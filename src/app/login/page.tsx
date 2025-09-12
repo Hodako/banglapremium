@@ -25,11 +25,21 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // Mock user login
+    localStorage.setItem("loggedInUser", JSON.stringify({ name: "John Doe" }));
+
     toast({
       title: "Logged In",
       description: "Welcome back!",
     });
-    router.push("/account");
+    
+    const redirectPath = localStorage.getItem('checkoutRedirect');
+    if (redirectPath) {
+      localStorage.removeItem('checkoutRedirect');
+      router.push(redirectPath);
+    } else {
+      router.push("/account");
+    }
   };
 
   return (

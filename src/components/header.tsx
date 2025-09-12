@@ -100,11 +100,6 @@ export function Header() {
                           <Sparkles className="h-6 w-6" />
                           <span className="font-headline">Digital Direct</span>
                         </Link>
-                        <SheetClose asChild>
-                           <Button variant="ghost" size="icon" data-radix-dialog-close>
-                            <X className="h-5 w-5" />
-                          </Button>
-                        </SheetClose>
                       </div>
                       <nav className="mt-8 flex flex-col gap-4">
                         {navLinks.map((link) => (
@@ -118,19 +113,22 @@ export function Header() {
                             </Link>
                         ))}
                       </nav>
-                      <div className="mt-auto border-t pt-4">
-                        <Link href="/account" onClick={closeMobileMenu}>
-                          <Button variant="ghost" className="w-full justify-start">
-                            <User className="mr-2 h-5 w-5" />
-                            My Account
-                          </Button>
-                        </Link>
-                         <Link href="/login" onClick={closeMobileMenu}>
-                          <Button variant="ghost" className="w-full justify-start">
-                            <User className="mr-2 h-5 w-5" />
-                            Login / Signup
-                          </Button>
-                        </Link>
+                      <div className="mt-auto border-t pt-4 flex flex-col gap-2">
+                        <SheetClose asChild>
+                           <Link href="/account">
+                            <Button variant="ghost" className="w-full justify-start">
+                                <User className="mr-2 h-5 w-5" />
+                                My Account
+                            </Button>
+                           </Link>
+                        </SheetClose>
+                         <SheetClose asChild>
+                            <Link href="/login">
+                                <Button variant="outline" className="w-full justify-center">
+                                    Login / Signup
+                                </Button>
+                            </Link>
+                         </SheetClose>
                       </div>
                     </div>
                   </SheetContent>
@@ -193,7 +191,7 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
-              <Link href="/account">
+              <Link href="/account" className="hidden md:flex">
                 <Button variant="ghost" size="icon" className="h-9 w-9">
                   <User className="h-5 w-5" />
                   <span className="sr-only">Account</span>

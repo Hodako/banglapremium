@@ -26,9 +26,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
+
+// Mock user session
+const useUser = () => {
+    const [user, setUser] = useState<{ name: string } | null>(null);
+    useEffect(() => {
+        const loggedInUser = localStorage.getItem("loggedInUser");
+        if(loggedInUser) {
+            setUser(JSON.parse(loggedInUser));
+        }
+    }, [])
+    return { user };
+}
 
 const checkoutSchema = z.object({
   transactionId: z.string().min(5, "Transaction ID is required"),
@@ -47,6 +59,7 @@ type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 export default function CheckoutPage() {
   const { cart, total, clearCart } = useCart();
   const router = useRouter();
+  const { user } = useUser();
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
@@ -65,10 +78,14 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
+    if (!user) {
+        localStorage.setItem('checkoutRedirect', '/checkout');
+        router.push('/login');
+    }
     if (cart.length === 0) {
       router.replace("/products");
     }
-  }, [cart, router]);
+  }, [cart, router, user]);
 
   const onSubmit = (data: CheckoutFormValues) => {
     console.log("Checkout data:", data);
@@ -77,7 +94,7 @@ export default function CheckoutPage() {
     router.push(`/order-confirmation?total=${total.toFixed(2)}`);
   };
 
-  if (cart.length === 0) {
+  if (cart.length === 0 || !user) {
     return null; // or a loading spinner
   }
 

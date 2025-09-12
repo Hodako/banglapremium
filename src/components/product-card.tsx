@@ -52,9 +52,9 @@ export function ProductCard({ product }: ProductCardProps) {
           <h3 className="text-sm font-medium leading-tight mb-2 group-hover:text-primary">{product.name}</h3>
         </Link>
          <div className="flex items-center justify-between mt-auto">
-            <div className="flex items-baseline gap-2">
-                <p className="text-base font-bold text-primary">৳{product.price.toFixed(2)}</p>
-                {product.originalPrice && <p className="text-sm text-muted-foreground line-through">৳{product.originalPrice.toFixed(2)}</p>}
+            <div className="flex items-baseline gap-1.5">
+                <p className="text-sm sm:text-base font-bold text-primary">৳{product.price.toFixed(2)}</p>
+                {product.originalPrice && <p className="text-xs sm:text-sm text-muted-foreground line-through">৳{product.originalPrice.toFixed(2)}</p>}
             </div>
         </div>
       </CardContent>
@@ -67,3 +67,4 @@ export function ProductCard({ product }: ProductCardProps) {
     </Card>
   );
 }
+

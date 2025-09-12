@@ -1,3 +1,6 @@
+
+'use client'
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -11,7 +14,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import Autoplay from "embla-carousel-autoplay";
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Home() {
   const featuredProducts = products.filter(p => p.isFeatured);
@@ -23,6 +27,12 @@ export default function Home() {
       <section className="relative overflow-hidden bg-gradient-to-b from-red-100/30 to-background py-2">
         <div className="container mx-auto px-4">
           <Carousel
+            plugins={[
+              Autoplay({
+                delay: 4000,
+                stopOnInteraction: true,
+              }),
+            ]}
             opts={{
               align: "start",
               loop: true,
@@ -63,8 +73,8 @@ export default function Home() {
                 </div>
               </CarouselItem>
             </CarouselContent>
-            <CarouselPrevious className="hidden sm:flex left-4 text-white" />
-            <CarouselNext className="hidden sm:flex right-4 text-white" />
+            <CarouselPrevious className="hidden sm:flex left-4 text-white bg-black/20 hover:bg-black/50 border-none" />
+            <CarouselNext className="hidden sm:flex right-4 text-white bg-black/20 hover:bg-black/50 border-none" />
           </Carousel>
         </div>
       </section>
@@ -109,7 +119,7 @@ export default function Home() {
               Best Sellers
             </h2>
              <Button variant="ghost" asChild>
-              <Link href="/products">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              <Link href="/best-sellers">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">

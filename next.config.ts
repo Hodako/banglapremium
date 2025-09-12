@@ -28,6 +28,18 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'logo.wine',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mma.prnewswire.com',
+        port: '',
+        pathname: '/**',
+      }
     ],
   },
 };

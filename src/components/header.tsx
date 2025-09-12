@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/context/cart-context";
 import { CartSheet } from "@/components/cart-sheet";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Sheet,
@@ -14,31 +14,64 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
+import { products } from "@/lib/data";
+import Image from "next/image";
 
 export function Header() {
   const { cart } = useCart();
   const router = useRouter();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<typeof products>([]);
+  const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  const handleSearch = (e: FormEvent<HTMLFormElement>) => {
+  const handleSearchSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const searchQuery = formData.get("search") as string;
     if (searchQuery.trim()) {
-      // Close mobile sheet if open
-      const closeButton = document.querySelector('[data-radix-dialog-close]');
-      if(closeButton instanceof HTMLElement) closeButton.click();
-      
+      setIsSuggestionsVisible(false);
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    if (query.trim().length > 1) {
+      const filtered = products.filter(p => p.name.toLowerCase().includes(query.toLowerCase())).slice(0, 5);
+      setSuggestions(filtered);
+      setIsSuggestionsVisible(true);
+    } else {
+      setSuggestions([]);
+      setIsSuggestionsVisible(false);
+    }
+  };
+
+  const closeMobileMenu = () => {
+    const closeButton = document.querySelector('[data-radix-dialog-close]');
+    if(closeButton instanceof HTMLElement) closeButton.click();
+  }
+
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      setIsSuggestionsVisible(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [handleClickOutside]);
+
+
   const navLinks = [
     { href: "/products", label: "Products" },
     { href: "/categories", label: "Categories" },
-    { href: "#", label: "Best Sellers" },
+    { href: "/products?sort=popularity", label: "Best Sellers" },
   ];
 
   return (
@@ -46,7 +79,7 @@ export function Header() {
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 gap-4">
           <div className="flex items-center gap-2 md:gap-6">
-            <div className="md:hidden">
+             <div className="md:hidden">
                 <Sheet>
                   <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
@@ -60,6 +93,7 @@ export function Header() {
                          <Link
                           href="/"
                           className="flex items-center gap-2 text-lg font-bold text-primary"
+                          onClick={closeMobileMenu}
                         >
                           <Sparkles className="h-6 w-6" />
                           <span className="font-headline">Digital Direct</span>
@@ -82,6 +116,14 @@ export function Header() {
                           </SheetClose>
                         ))}
                       </nav>
+                      <div className="mt-auto border-t pt-4">
+                        <Link href="/account" onClick={closeMobileMenu}>
+                          <Button variant="ghost" className="w-full justify-start">
+                            <User className="mr-2 h-5 w-5" />
+                            Account
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
                   </SheetContent>
                 </Sheet>
@@ -95,8 +137,8 @@ export function Header() {
             </Link>
           </div>
 
-          <div className="flex-1 px-4">
-              <form onSubmit={handleSearch} className="w-full">
+          <div ref={searchRef} className="flex-1 px-4 relative">
+              <form onSubmit={handleSearchSubmit} className="w-full">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -104,27 +146,60 @@ export function Header() {
                     name="search"
                     placeholder="Search for products, brands and more"
                     className="h-10 w-full rounded-full bg-muted/50 border-transparent focus:border-primary focus:bg-background focus:ring-primary pl-10"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    onFocus={() => { if(searchQuery) setIsSuggestionsVisible(true)}}
                   />
                 </div>
               </form>
+               {isSuggestionsVisible && suggestions.length > 0 && (
+                <div className="absolute top-full mt-2 w-full rounded-md border bg-background shadow-lg z-50">
+                  <ul className="py-1">
+                    {suggestions.map(product => (
+                      <li key={product.id}>
+                        <Link 
+                          href={`/products/${product.slug}`}
+                          className="flex items-center gap-4 px-4 py-2 hover:bg-muted"
+                          onClick={() => setIsSuggestionsVisible(false)}
+                        >
+                          <Image src={product.imageUrl} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
+                          <div>
+                            <p className="font-medium text-sm">{product.name}</p>
+                            <p className="text-xs text-muted-foreground">${product.price.toFixed(2)}</p>
+                          </div>
+                        </Link>
+                      </li>
+                    ))}
+                    <li className="border-t mt-1 pt-1">
+                       <Link 
+                          href={`/search?q=${encodeURIComponent(searchQuery.trim())}`}
+                          className="w-full text-center block px-4 py-2 text-sm font-medium text-primary hover:bg-muted"
+                          onClick={() => setIsSuggestionsVisible(false)}
+                        >
+                          View all results for &quot;{searchQuery}&quot;
+                        </Link>
+                    </li>
+                  </ul>
+                </div>
+              )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
               <Link href="/account" className="hidden sm:block">
-                <Button variant="ghost" size="sm">
-                  <User className="mr-1 h-5 w-5" />
-                  Account
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <User className="h-5 w-5" />
+                  <span className="sr-only">Account</span>
                 </Button>
               </Link>
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative"
+                className="relative h-9 w-9"
                 onClick={() => setIsCartOpen(true)}
               >
-                <ShoppingCart className="h-6 w-6" />
+                <ShoppingCart className="h-5 w-5" />
                 {cartItemCount > 0 && (
-                  <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                     {cartItemCount}
                   </span>
                 )}

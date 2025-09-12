@@ -22,23 +22,56 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Mock user login
-    localStorage.setItem("loggedInUser", JSON.stringify({ name: "John Doe" }));
+    setIsLoading(true);
 
-    toast({
-      title: "Logged In",
-      description: "Welcome back!",
-    });
-    
-    const redirectPath = localStorage.getItem('checkoutRedirect');
-    if (redirectPath) {
-      localStorage.removeItem('checkoutRedirect');
-      router.push(redirectPath);
-    } else {
-      router.push("/account");
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong');
+      }
+
+      // Store the token (e.g., in localStorage or cookies)
+      // For this example, we'll assume the token is in data.token
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("loggedInUser", JSON.stringify(data.user));
+
+
+      toast({
+        title: "Logged In",
+        description: "Welcome back!",
+      });
+      
+      const redirectPath = localStorage.getItem('checkoutRedirect');
+      if (redirectPath) {
+        localStorage.removeItem('checkoutRedirect');
+        router.push(redirectPath);
+      } else {
+        router.push("/account");
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,6 +93,9 @@ export default function LoginPage() {
                 type="email"
                 placeholder="m@example.com"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -77,6 +113,9 @@ export default function LoginPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
                 />
                  <Button
                     type="button"
@@ -84,6 +123,7 @@ export default function LoginPage() {
                     size="icon"
                     className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={isLoading}
                   >
                     {showPassword ? <EyeOff /> : <Eye />}
                     <span className="sr-only">Toggle password visibility</span>
@@ -92,8 +132,8 @@ export default function LoginPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
             <div className="text-center text-sm">
               Don&apos;t have an account?{" "}

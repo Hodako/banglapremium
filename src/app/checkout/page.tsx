@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCart } from "@/context/cart-context";
@@ -30,13 +31,15 @@ import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 
-// Mock user session
+// Mock user session hook
 const useUser = () => {
     const [user, setUser] = useState<{ name: string } | null>(null);
     useEffect(() => {
-        const loggedInUser = localStorage.getItem("loggedInUser");
-        if(loggedInUser) {
-            setUser(JSON.parse(loggedInUser));
+        // In a real app, you'd verify the token with your backend
+        const token = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("loggedInUser");
+        if (token && storedUser) {
+            setUser(JSON.parse(storedUser));
         }
     }, [])
     return { user };
@@ -82,7 +85,7 @@ export default function CheckoutPage() {
         localStorage.setItem('checkoutRedirect', '/checkout');
         router.push('/login');
     }
-    if (cart.length === 0) {
+    if (cart.length === 0 && user) {
       router.replace("/products");
     }
   }, [cart, router, user]);

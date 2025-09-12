@@ -20,16 +20,16 @@ export function Footer() {
             <ul className="mt-4 space-y-2">
               <li><Link href="/products" className="text-muted-foreground hover:text-primary">All Products</Link></li>
               <li><Link href="/categories" className="text-muted-foreground hover:text-primary">Categories</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">Best Sellers</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">New Arrivals</Link></li>
+              <li><Link href="/best-sellers" className="text-muted-foreground hover:text-primary">Best Sellers</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="font-semibold tracking-wide text-foreground">About</h3>
             <ul className="mt-4 space-y-2">
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">Our Story</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">Careers</Link></li>
-              <li><Link href="#" className="text-muted-foreground hover:text-primary">Contact Us</Link></li>
+              <li><Link href="/about/our-story" className="text-muted-foreground hover:text-primary">Our Story</Link></li>
+              <li><Link href="/about/careers" className="text-muted-foreground hover:text-primary">Careers</Link></li>
+              <li><Link href="/about/contact-us" className="text-muted-foreground hover:text-primary">Contact Us</Link></li>
+              <li><Link href="/legal/terms-and-conditions" className="text-muted-foreground hover:text-primary">Terms & Conditions</Link></li>
             </ul>
           </div>
           <div>

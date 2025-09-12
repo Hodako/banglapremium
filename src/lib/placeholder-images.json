@@ -1,3 +1,64 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "prod1",
+      "description": "YouTube Premium",
+      "imageUrl": "https://picsum.photos/seed/prod1/600/400",
+      "imageHint": "video play button"
+    },
+    {
+      "id": "prod2",
+      "description": "Facebook Premium",
+      "imageUrl": "https://picsum.photos/seed/prod2/600/400",
+      "imageHint": "social connection"
+    },
+    {
+      "id": "prod3",
+      "description": "LinkedIn Premium",
+      "imageUrl": "https://picsum.photos/seed/prod3/600/400",
+      "imageHint": "business handshake"
+    },
+    {
+      "id": "prod4",
+      "description": "Spotify Premium",
+      "imageUrl": "https://picsum.photos/seed/prod4/600/400",
+      "imageHint": "music notes"
+    },
+    {
+      "id": "prod5",
+      "description": "Netflix Premium",
+      "imageUrl": "https://picsum.photos/seed/prod5/600/400",
+      "imageHint": "movie reel"
+    },
+    {
+      "id": "prod6",
+      "description": "X Premium",
+      "imageUrl": "https://picsum.photos/seed/prod6/600/400",
+      "imageHint": "abstract bird"
+    },
+    {
+      "id": "cat1",
+      "description": "Entertainment Category",
+      "imageUrl": "https://picsum.photos/seed/cat1/600/400",
+      "imageHint": "cinema screen"
+    },
+    {
+      "id": "cat2",
+      "description": "Social Media Category",
+      "imageUrl": "https://picsum.photos/seed/cat2/600/400",
+      "imageHint": "social network"
+    },
+    {
+      "id": "cat3",
+      "description": "Professional Category",
+      "imageUrl": "https://picsum.photos/seed/cat3/600/400",
+      "imageHint": "office meeting"
+    },
+    {
+      "id": "cat4",
+      "description": "Music Category",
+      "imageUrl": "https://picsum.photos/seed/cat4/600/400",
+      "imageHint": "headphones concert"
+    }
+  ]
 }

@@ -19,7 +19,7 @@ export default function Home() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-gradient-to-b from-red-100/30 to-background py-2 md:py-3">
+      <section className="relative overflow-hidden bg-gradient-to-b from-red-100/30 to-background py-2">
         <div className="container mx-auto px-4">
           <Carousel
             opts={{
@@ -30,7 +30,7 @@ export default function Home() {
           >
             <CarouselContent>
               <CarouselItem>
-                <div className="relative h-48 md:h-72 w-full rounded-lg overflow-hidden">
+                <div className="relative h-48 md:h-64 w-full rounded-lg overflow-hidden">
                     <Image src="https://picsum.photos/seed/hero1/1200/400" alt="Hero 1" fill className="object-cover" data-ai-hint="sale promotion" />
                     <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center text-white p-4">
                         <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
@@ -46,7 +46,7 @@ export default function Home() {
                 </div>
               </CarouselItem>
                <CarouselItem>
-                <div className="relative h-48 md:h-72 w-full rounded-lg overflow-hidden">
+                <div className="relative h-48 md:h-64 w-full rounded-lg overflow-hidden">
                     <Image src="https://picsum.photos/seed/hero2/1200/400" alt="Hero 2" fill className="object-cover" data-ai-hint="new products" />
                     <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center text-white p-4">
                         <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
@@ -68,7 +68,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-8 md:py-12">
+      <section className="py-8 md:py-10">
         <div className="container mx-auto px-4">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight md:text-3xl font-headline">
@@ -100,7 +100,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-muted/30 py-8 md:py-12">
+      <section className="bg-muted/30 py-8 md:py-10">
         <div className="container mx-auto px-4">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight md:text-3xl font-headline">
@@ -111,7 +111,7 @@ export default function Home() {
               <Link href="/products">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {bestSellingProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

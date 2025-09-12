@@ -20,7 +20,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <Card className="flex h-full flex-col overflow-hidden transition-all hover:shadow-lg group">
       <div className="p-0">
         <Link href={`/products/${product.slug}`}>
-          <div className="relative aspect-square">
+          <div className="relative aspect-video">
             <Image
               src={product.imageUrl}
               alt={product.name}

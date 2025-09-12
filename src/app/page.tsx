@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { products } from '@/lib/data';
+import { products, categories } from '@/lib/data';
 import { ProductCard } from '@/components/product-card';
-import { ArrowRight, Star, Tag, Gift } from 'lucide-react';
+import { ArrowRight, Star, Tag, Gift, LayoutGrid } from 'lucide-react';
 import {
   Carousel,
   CarouselContent,
@@ -11,11 +11,12 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 export default function Home() {
   const featuredProducts = products.filter(p => p.isFeatured);
   const bestSellingProducts = products.filter(p => p.isBestSelling);
+  const topCategories = categories.slice(0, 4);
 
   return (
     <div>
@@ -150,6 +151,43 @@ export default function Home() {
                     </div>
                 </Link>
             </Card>
+          </div>
+        </div>
+      </section>
+
+       <section className="py-8 md:py-10">
+        <div className="container mx-auto px-4">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight md:text-3xl font-headline">
+              <LayoutGrid className="h-6 w-6 text-primary" />
+              Top Categories
+            </h2>
+            <Button variant="ghost" asChild>
+              <Link href="/categories">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+          </div>
+           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {topCategories.map((category) => (
+              <Link key={category.id} href={`/categories/${category.slug}`} className="group block">
+                <Card className="h-full overflow-hidden transition-all group-hover:shadow-lg group-hover:-translate-y-1">
+                  <div className="relative h-40 w-full">
+                    <Image
+                      src={category.imageUrl}
+                      alt={category.name}
+                      fill
+                      className="object-cover"
+                      data-ai-hint={category.imageHint}
+                    />
+                  </div>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      {category.name}
+                      <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

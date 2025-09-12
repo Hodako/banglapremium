@@ -58,13 +58,13 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
                     </div>
                     <div className="flex flex-grow flex-col justify-between">
                       <div>
-                        <Link href={`/products/${item.product.slug}`} passHref>
-                          <SheetClose asChild>
-                            <a className="font-medium hover:underline">{item.product.name}</a>
-                           </SheetClose>
-                        </Link>
+                        <SheetClose asChild>
+                          <Link href={`/products/${item.product.slug}`} className="font-medium hover:underline">
+                            {item.product.name}
+                          </Link>
+                        </SheetClose>
                         <p className="text-sm text-muted-foreground">
-                          ${item.product.price.toFixed(2)}
+                          ৳{item.product.price.toFixed(2)}
                         </p>
                       </div>
                       <div className="flex items-center justify-between">
@@ -110,7 +110,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
                 <Separator />
                 <div className="flex justify-between font-medium">
                   <span>Subtotal</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>৳{total.toFixed(2)}</span>
                 </div>
                 <Button size="lg" className="w-full" onClick={handleCheckout}>
                   Proceed to Checkout

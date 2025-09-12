@@ -5,6 +5,7 @@ export interface Product {
   description: string;
   longDescription: string;
   price: number;
+  originalPrice?: number;
   imageUrl: string;
   imageHint: string;
   category: string;

@@ -28,7 +28,7 @@ function ConfirmationContent() {
             </h3>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Total Amount Paid:</span>
-              <span className="font-medium">${total ? parseFloat(total).toFixed(2) : '0.00'}</span>
+              <span className="font-medium">৳{total ? parseFloat(total).toFixed(2) : '0.00'}</span>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
               You will receive an email confirmation shortly with your subscription details. Please check your spam folder if you don't see it.

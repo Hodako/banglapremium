@@ -53,9 +53,9 @@ export default function ProductDetailPage({ params }: { params: { slug:string } 
           <span className="text-sm font-semibold uppercase tracking-wider text-primary">{product.category}</span>
           <h1 className="font-headline mt-2 text-4xl font-extrabold tracking-tight">{product.name}</h1>
           <p className="mt-4 text-lg text-muted-foreground">{product.longDescription}</p>
-          <div className="mt-6">
-            <span className="text-4xl font-bold text-foreground">${product.price.toFixed(2)}</span>
-            <span className="ml-2 text-muted-foreground">/ month</span>
+          <div className="mt-6 flex items-baseline gap-4">
+            <span className="text-4xl font-bold text-foreground">৳{product.price.toFixed(2)}</span>
+            {product.originalPrice && <span className="text-2xl text-muted-foreground line-through">৳{product.originalPrice.toFixed(2)}</span>}
           </div>
           <div className="mt-8">
             <AddToCartButton product={product} />

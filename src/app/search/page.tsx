@@ -35,7 +35,7 @@ function SearchResults() {
       </p>
 
       {filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
@@ -57,7 +57,7 @@ function SearchLoading() {
         <div className="container mx-auto px-4 py-8">
             <Skeleton className="h-10 w-1/2 mb-2" />
             <Skeleton className="h-6 w-1/4 mb-8" />
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                 {[...Array(8)].map((_, i) => (
                     <div key={i} className="space-y-2">
                         <Skeleton className="aspect-video w-full" />

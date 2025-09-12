@@ -37,7 +37,10 @@ export function ProductCard({ product }: ProductCardProps) {
           <h3 className="text-sm font-medium leading-tight mb-1 group-hover:text-primary">{product.name}</h3>
         </Link>
          <div className="flex items-center justify-between mt-auto">
-            <p className="text-base font-bold text-primary">${product.price.toFixed(2)}</p>
+            <div className="flex items-baseline gap-2">
+                <p className="text-base font-bold text-primary">৳{product.price.toFixed(2)}</p>
+                {product.originalPrice && <p className="text-sm text-muted-foreground line-through">৳{product.originalPrice.toFixed(2)}</p>}
+            </div>
             {product.isBestSelling && <Badge variant="secondary" className="text-xs bg-yellow-400/80 text-yellow-900">Best Seller</Badge>}
         </div>
       </CardContent>

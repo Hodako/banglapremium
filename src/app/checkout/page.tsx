@@ -106,10 +106,14 @@ export default function CheckoutPage() {
             <CardHeader>
               <CardTitle>Payment Details</CardTitle>
               <CardDescription>
-                Complete your payment using bKash or Nagad and enter the details below.
+                Complete your payment and enter the details below.
               </CardDescription>
             </CardHeader>
             <CardContent>
+                 <div className="mb-6 flex items-center justify-center gap-4">
+                    <Image src="https://www.logo.wine/a/logo/BKash/BKash-bKash-Logo.wine.svg" alt="bKash" width={100} height={50} className="object-contain"/>
+                    <Image src="https://mma.prnewswire.com/media/1918049/Nagad_Logo.jpg" alt="Nagad" width={100} height={50} className="object-contain"/>
+                </div>
               <Alert className="mb-6">
                  <Terminal className="h-4 w-4" />
                 <AlertTitle>Manual Payment Instructions</AlertTitle>
@@ -199,7 +203,7 @@ export default function CheckoutPage() {
                           <p className="font-medium">{item.product.name}</p>
                         </div>
                       </div>
-                      <p className="font-medium">${(item.product.price * item.quantity).toFixed(2)}</p>
+                      <p className="font-medium">৳{(item.product.price * item.quantity).toFixed(2)}</p>
                     </div>
                   ))}
                 </div>
@@ -208,16 +212,16 @@ export default function CheckoutPage() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>৳{total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Taxes & Fees</span>
-                  <span>$0.00</span>
+                  <span>৳0.00</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>৳{total.toFixed(2)}</span>
                 </div>
               </div>
             </CardContent>

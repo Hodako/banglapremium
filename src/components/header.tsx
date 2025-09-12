@@ -12,8 +12,9 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Sheet,
   SheetContent,
+  SheetHeader,
+  SheetTitle,
   SheetTrigger,
-  SheetClose,
 } from "@/components/ui/sheet";
 import { products } from "@/lib/data";
 import Image from "next/image";
@@ -23,6 +24,7 @@ export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<typeof products>([]);
   const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
@@ -52,8 +54,7 @@ export function Header() {
   };
 
   const closeMobileMenu = () => {
-    const closeButton = document.querySelector('[data-radix-dialog-close]');
-    if(closeButton instanceof HTMLElement) closeButton.click();
+    setIsMobileMenuOpen(false);
   }
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
@@ -82,7 +83,7 @@ export function Header() {
         <div className="container mx-auto flex h-16 items-center justify-between px-4 gap-4">
           <div className="flex items-center gap-2 md:gap-6">
              <div className="md:hidden">
-                <Sheet>
+                <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                   <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
                       <Menu className="h-6 w-6" />
@@ -90,17 +91,19 @@ export function Header() {
                     </Button>
                   </SheetTrigger>
                   <SheetContent side="left" className="w-full max-w-xs sm:max-w-sm">
+                    <SheetHeader>
+                        <SheetTitle>
+                            <Link
+                                href="/"
+                                className="flex items-center gap-2 text-lg font-bold text-primary"
+                                onClick={closeMobileMenu}
+                                >
+                                <Sparkles className="h-6 w-6" />
+                                <span className="font-headline">Digital Direct</span>
+                            </Link>
+                        </SheetTitle>
+                    </SheetHeader>
                      <div className="flex h-full flex-col">
-                      <div className="flex items-center justify-between border-b pb-4">
-                         <Link
-                          href="/"
-                          className="flex items-center gap-2 text-lg font-bold text-primary"
-                          onClick={closeMobileMenu}
-                        >
-                          <Sparkles className="h-6 w-6" />
-                          <span className="font-headline">Digital Direct</span>
-                        </Link>
-                      </div>
                       <nav className="mt-8 flex flex-col gap-4">
                         {navLinks.map((link) => (
                            <Link
@@ -114,21 +117,17 @@ export function Header() {
                         ))}
                       </nav>
                       <div className="mt-auto border-t pt-4 flex flex-col gap-2">
-                        <SheetClose asChild>
-                           <Link href="/account">
+                           <Link href="/account" onClick={closeMobileMenu}>
                             <Button variant="ghost" className="w-full justify-start">
                                 <User className="mr-2 h-5 w-5" />
                                 My Account
                             </Button>
                            </Link>
-                        </SheetClose>
-                         <SheetClose asChild>
-                            <Link href="/login">
+                            <Link href="/login" onClick={closeMobileMenu}>
                                 <Button variant="outline" className="w-full justify-center">
                                     Login / Signup
                                 </Button>
                             </Link>
-                         </SheetClose>
                       </div>
                     </div>
                   </SheetContent>
@@ -171,7 +170,7 @@ export function Header() {
                           <Image src={product.imageUrl} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
                           <div>
                             <p className="font-medium text-sm">{product.name}</p>
-                            <p className="text-xs text-muted-foreground">${product.price.toFixed(2)}</p>
+                            <p className="text-xs text-muted-foreground">৳{product.price.toFixed(2)}</p>
                           </div>
                         </Link>
                       </li>
@@ -191,7 +190,7 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
-              <Link href="/account" className="hidden md:flex">
+              <Link href="/account" className="flex">
                 <Button variant="ghost" size="icon" className="h-9 w-9">
                   <User className="h-5 w-5" />
                   <span className="sr-only">Account</span>

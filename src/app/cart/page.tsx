@@ -48,9 +48,9 @@ export default function CartPage() {
                         <h2 className="font-medium hover:underline">
                           <Link href={`/products/${item.product.slug}`}>{item.product.name}</Link>
                         </h2>
-                        <p className="font-semibold">${(item.product.price * item.quantity).toFixed(2)}</p>
+                        <p className="font-semibold">৳{(item.product.price * item.quantity).toFixed(2)}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">${item.product.price.toFixed(2)} each</p>
+                      <p className="text-sm text-muted-foreground">৳{item.product.price.toFixed(2)} each</p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Button
@@ -97,7 +97,7 @@ export default function CartPage() {
             <CardContent className="space-y-4">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>${total.toFixed(2)}</span>
+                <span>৳{total.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Taxes</span>
@@ -106,7 +106,7 @@ export default function CartPage() {
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total</span>
-                <span>${total.toFixed(2)}</span>
+                <span>৳{total.toFixed(2)}</span>
               </div>
             </CardContent>
             <CardFooter>

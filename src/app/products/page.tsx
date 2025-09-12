@@ -16,26 +16,25 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetFooter,
-  SheetClose
 } from "@/components/ui/sheet";
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, ListFilter, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ListFilter } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 
 const PRODUCTS_PER_PAGE = 8;
+const MAX_PRICE = 5000;
 
 function Filters({ isMobile, closeSheet }: { isMobile: boolean, closeSheet?: () => void }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  const [priceRange, setPriceRange] = useState<[number]>([Number(searchParams.get('price')) || 50]);
+  const [priceRange, setPriceRange] = useState<[number]>([Number(searchParams.get('price')) || MAX_PRICE]);
   const [currentCategory, setCurrentCategory] = useState(searchParams.get('category') || 'all');
   const [currentSort, setCurrentSort] = useState(searchParams.get('sort') || 'popularity');
 
@@ -57,7 +56,7 @@ function Filters({ isMobile, closeSheet }: { isMobile: boolean, closeSheet?: () 
   }
   
   const resetFilters = () => {
-    setPriceRange([50]);
+    setPriceRange([MAX_PRICE]);
     setCurrentCategory('all');
     setCurrentSort('popularity');
     router.push(pathname);
@@ -87,12 +86,12 @@ function Filters({ isMobile, closeSheet }: { isMobile: boolean, closeSheet?: () 
         </Select>
       </div>
       <div>
-        <Label htmlFor="price-range" className="text-base">Max Price: ${priceRange[0]}</Label>
+        <Label htmlFor="price-range" className="text-base">Max Price: ৳{priceRange[0]}</Label>
         <Slider
           id="price-range"
           min={0}
-          max={50}
-          step={1}
+          max={MAX_PRICE}
+          step={100}
           value={priceRange}
           onValueChange={setPriceRange}
           onValueCommit={handlePriceCommit}
@@ -127,7 +126,7 @@ export default function ProductsPage() {
   const category = searchParams.get('category') || 'all';
   const sort = searchParams.get('sort') || 'popularity';
   const page = Number(searchParams.get('page')) || 1;
-  const maxPrice = Number(searchParams.get('price')) || 50;
+  const maxPrice = Number(searchParams.get('price')) || MAX_PRICE;
 
 
   const filteredAndSortedProducts = useMemo(() => {
@@ -150,12 +149,10 @@ export default function ProductsPage() {
         filtered.sort((a, b) => b.price - a.price);
         break;
       case 'newest':
-        // Assuming products are in a somewhat chronological order by default
-        filtered.reverse();
+        filtered.sort((a, b) => (new Date(b.releaseDate || 0).getTime()) - (new Date(a.releaseDate || 0).getTime()));
         break;
       case 'popularity':
       default:
-        // A simple popularity sort based on isBestSelling and isFeatured
         filtered.sort((a, b) => (b.isBestSelling ? 1 : 0) - (a.isBestSelling ? 1 : 0) || (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
         break;
     }
@@ -173,6 +170,7 @@ export default function ProductsPage() {
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', String(newPage));
     router.push(`${pathname}?${params.toString()}`);
+    window.scrollTo(0, 0);
   }
   
   const FilterComponent = isMobile ? (
@@ -193,7 +191,7 @@ export default function ProductsPage() {
       </SheetContent>
     </Sheet>
   ) : (
-      <aside className="md:col-span-1 p-4 border rounded-lg bg-card sticky top-24">
+      <aside className="md:col-span-1 p-4 border rounded-lg bg-card sticky top-24 h-fit">
         <Filters isMobile={false}/>
       </aside>
   );
@@ -202,7 +200,7 @@ export default function ProductsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 text-center">
-        <h1 className="font-headline text-4xl font-extrabold tracking-tight">All Products</h1>
+        <h1 className="font-headline text-3xl font-extrabold tracking-tight">All Products</h1>
         <p className="mt-2 text-lg text-muted-foreground">Find the perfect digital service for you.</p>
       </div>
       
@@ -213,7 +211,7 @@ export default function ProductsPage() {
         <main className="md:col-span-3">
            {paginatedProducts.length > 0 ? (
             <>
-              <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {paginatedProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -222,22 +220,22 @@ export default function ProductsPage() {
                 <div className="mt-8 flex justify-center items-center gap-4">
                   <Button
                     variant="outline"
-                    size="icon"
                     onClick={() => handlePageChange(page - 1)}
                     disabled={page <= 1}
                   >
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Previous
                   </Button>
                   <span className="text-sm">
                     Page {page} of {totalPages}
                   </span>
                   <Button
                     variant="outline"
-                    size="icon"
                     onClick={() => handlePageChange(page + 1)}
                     disabled={page >= totalPages}
                   >
-                    <ArrowRight className="h-4 w-4" />
+                    Next
+                    <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </div>
               )}

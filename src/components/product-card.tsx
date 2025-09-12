@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -6,7 +7,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
 import type { Product } from "@/lib/types";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface ProductCardProps {
@@ -16,35 +17,48 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
 
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const discountPercentage = hasDiscount 
+    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
+    : 0;
+
   return (
     <Card className="flex h-full flex-col overflow-hidden transition-all hover:shadow-lg group">
-      <div className="p-0">
-        <Link href={`/products/${product.slug}`}>
-          <div className="relative aspect-video">
+      <Link href={`/products/${product.slug}`} className="block p-0">
+          <div className="relative aspect-[4/3] w-full">
             <Image
               src={product.imageUrl}
               alt={product.name}
               fill
               className="object-cover transition-transform group-hover:scale-105"
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
               data-ai-hint={product.imageHint}
             />
+             {product.isBestSelling && (
+              <Badge variant="secondary" className="absolute top-2 left-2 bg-amber-400 text-amber-900 font-bold gap-1 pl-1.5">
+                <Star className="h-3 w-3" /> Best Seller
+              </Badge>
+            )}
+             {hasDiscount && (
+              <Badge variant="destructive" className="absolute top-2 right-2">
+                -{discountPercentage}%
+              </Badge>
+            )}
           </div>
-        </Link>
-      </div>
-      <CardContent className="flex-grow p-2 flex flex-col">
+      </Link>
+      <CardContent className="flex flex-1 flex-col p-3">
         <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
         <Link href={`/products/${product.slug}`} className="flex-grow">
-          <h3 className="text-sm font-medium leading-tight mb-1 group-hover:text-primary">{product.name}</h3>
+          <h3 className="text-sm font-medium leading-tight mb-2 group-hover:text-primary">{product.name}</h3>
         </Link>
          <div className="flex items-center justify-between mt-auto">
             <div className="flex items-baseline gap-2">
                 <p className="text-base font-bold text-primary">৳{product.price.toFixed(2)}</p>
                 {product.originalPrice && <p className="text-sm text-muted-foreground line-through">৳{product.originalPrice.toFixed(2)}</p>}
             </div>
-            {product.isBestSelling && <Badge variant="secondary" className="text-xs bg-yellow-400/80 text-yellow-900">Best Seller</Badge>}
         </div>
       </CardContent>
-      <CardFooter className="p-2 pt-0">
+      <CardFooter className="p-3 pt-0">
         <Button onClick={() => addToCart(product)} className="w-full" size="sm">
           <ShoppingCart className="mr-2 h-4 w-4" />
           Add to Cart

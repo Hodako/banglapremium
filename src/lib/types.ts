@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -11,6 +12,7 @@ export interface Product {
   category: string;
   isFeatured: boolean;
   isBestSelling: boolean;
+  releaseDate?: string;
 }
 
 export interface Category {

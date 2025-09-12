@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { products } from '@/lib/data';
 import { ProductCard } from '@/components/product-card';
-import { ArrowRight, Star, Tag } from 'lucide-react';
+import { ArrowRight, Star, Tag, Gift } from 'lucide-react';
 import {
   Carousel,
   CarouselContent,
@@ -11,6 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Card } from '@/components/ui/card';
 
 export default function Home() {
   const featuredProducts = products.filter(p => p.isFeatured);
@@ -18,7 +19,7 @@ export default function Home() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-gradient-to-b from-red-100/30 to-background py-12 md:py-20">
+      <section className="relative overflow-hidden bg-gradient-to-b from-red-100/30 to-background py-6 md:py-10">
         <div className="container mx-auto px-4">
           <Carousel
             opts={{
@@ -67,9 +68,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-12 md:py-16">
+      <section className="py-8 md:py-12">
         <div className="container mx-auto px-4">
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-6 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight md:text-3xl font-headline">
               <Tag className="h-6 w-6 text-primary" />
               Featured Products
@@ -99,9 +100,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-muted/30 py-12 md:py-16">
+      <section className="bg-muted/30 py-8 md:py-12">
         <div className="container mx-auto px-4">
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-6 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight md:text-3xl font-headline">
               <Star className="h-6 w-6 text-primary" />
               Best Sellers
@@ -114,6 +115,41 @@ export default function Home() {
             {bestSellingProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-8 md:py-12">
+        <div className="container mx-auto px-4">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight md:text-3xl font-headline">
+              <Gift className="h-6 w-6 text-primary" />
+              Just for You
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <Card className="overflow-hidden group relative">
+                <Link href="#">
+                    <Image src="https://picsum.photos/seed/offer1/800/400" alt="Special Offer 1" width={800} height={400} className="object-cover w-full h-auto transition-transform group-hover:scale-105" data-ai-hint="electronics sale" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 p-6">
+                        <h3 className="text-white font-bold text-2xl">Gaming Subscriptions</h3>
+                        <p className="text-white/90 mb-4">Up to 30% off on premium gaming services.</p>
+                        <Button>Buy Now</Button>
+                    </div>
+                </Link>
+            </Card>
+            <Card className="overflow-hidden group relative">
+                 <Link href="#">
+                    <Image src="https://picsum.photos/seed/offer2/800/400" alt="Special Offer 2" width={800} height={400} className="object-cover w-full h-auto transition-transform group-hover:scale-105" data-ai-hint="streaming service" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                     <div className="absolute bottom-0 left-0 p-6">
+                        <h3 className="text-white font-bold text-2xl">Movie & TV Streaming</h3>
+                        <p className="text-white/90 mb-4">Get your first 3 months for just $1.</p>
+                        <Button>Buy Now</Button>
+                    </div>
+                </Link>
+            </Card>
           </div>
         </div>
       </section>

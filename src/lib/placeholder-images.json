@@ -59,6 +59,18 @@
       "description": "Music Category",
       "imageUrl": "https://picsum.photos/seed/cat4/600/400",
       "imageHint": "headphones concert"
+    },
+    {
+      "id": "offer1",
+      "description": "Gaming subscriptions offer",
+      "imageUrl": "https://picsum.photos/seed/offer1/800/400",
+      "imageHint": "electronics sale"
+    },
+    {
+      "id": "offer2",
+      "description": "Movie streaming offer",
+      "imageUrl": "https://picsum.photos/seed/offer2/800/400",
+      "imageHint": "streaming service"
     }
   ]
 }

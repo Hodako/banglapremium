@@ -73,7 +73,7 @@ export function Header() {
   const navLinks = [
     { href: "/products", label: "Products" },
     { href: "/categories", label: "Categories" },
-    { href: "/products?sort=popularity", label: "Best Sellers" },
+    { href: "/best-sellers", label: "Best Sellers" },
   ];
 
   return (
@@ -122,7 +122,7 @@ export function Header() {
                         <Link href="/account" onClick={closeMobileMenu}>
                           <Button variant="ghost" className="w-full justify-start">
                             <User className="mr-2 h-5 w-5" />
-                            Account
+                            My Account
                           </Button>
                         </Link>
                          <Link href="/login" onClick={closeMobileMenu}>
@@ -193,7 +193,7 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
-              <Link href="/account" className="hidden sm:block">
+              <Link href="/account">
                 <Button variant="ghost" size="icon" className="h-9 w-9">
                   <User className="h-5 w-5" />
                   <span className="sr-only">Account</span>

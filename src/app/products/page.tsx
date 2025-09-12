@@ -13,7 +13,6 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -31,7 +30,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const PRODUCTS_PER_PAGE = 8;
 
-function Filters({ isMobile }: { isMobile: boolean }) {
+function Filters({ isMobile, closeSheet }: { isMobile: boolean, closeSheet?: () => void }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -47,6 +46,9 @@ function Filters({ isMobile }: { isMobile: boolean }) {
       params.set('page', '1');
     }
     router.push(`${pathname}?${params.toString()}`);
+    if (isMobile && closeSheet) {
+      closeSheet();
+    }
   };
 
   const handlePriceCommit = (value: number[]) => {
@@ -59,6 +61,9 @@ function Filters({ isMobile }: { isMobile: boolean }) {
     setCurrentCategory('all');
     setCurrentSort('popularity');
     router.push(pathname);
+    if (isMobile && closeSheet) {
+        closeSheet();
+    }
   }
 
   return (
@@ -117,6 +122,7 @@ export default function ProductsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const isMobile = useIsMobile();
+  const [sheetOpen, setSheetOpen] = useState(false);
   
   const category = searchParams.get('category') || 'all';
   const sort = searchParams.get('sort') || 'popularity';
@@ -170,28 +176,20 @@ export default function ProductsPage() {
   }
   
   const FilterComponent = isMobile ? (
-    <Sheet>
+    <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" className="w-full">
           <ListFilter className="mr-2 h-4 w-4" />
           Filters
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent side="left">
         <SheetHeader>
           <SheetTitle>Filter Products</SheetTitle>
-          <SheetDescription>
-            Refine your search to find the perfect product.
-          </SheetDescription>
         </SheetHeader>
         <div className="py-4">
-          <Filters isMobile={true} />
+          <Filters isMobile={true} closeSheet={() => setSheetOpen(false)} />
         </div>
-        <SheetFooter>
-            <SheetClose asChild>
-                <Button className="w-full">Apply Filters</Button>
-            </SheetClose>
-        </SheetFooter>
       </SheetContent>
     </Sheet>
   ) : (

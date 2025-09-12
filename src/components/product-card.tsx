@@ -31,17 +31,17 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </Link>
       </div>
-      <CardContent className="flex-grow p-3 flex flex-col">
+      <CardContent className="flex-grow p-2 flex flex-col">
         <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
         <Link href={`/products/${product.slug}`} className="flex-grow">
-          <h3 className="text-sm font-medium leading-tight mb-2 group-hover:text-primary">{product.name}</h3>
+          <h3 className="text-sm font-medium leading-tight mb-1 group-hover:text-primary">{product.name}</h3>
         </Link>
          <div className="flex items-center justify-between mt-auto">
-            <p className="text-lg font-bold text-primary">${product.price.toFixed(2)}</p>
+            <p className="text-base font-bold text-primary">${product.price.toFixed(2)}</p>
             {product.isBestSelling && <Badge variant="secondary" className="text-xs bg-yellow-400/80 text-yellow-900">Best Seller</Badge>}
         </div>
       </CardContent>
-      <CardFooter className="p-3 pt-0">
+      <CardFooter className="p-2 pt-0">
         <Button onClick={() => addToCart(product)} className="w-full" size="sm">
           <ShoppingCart className="mr-2 h-4 w-4" />
           Add to Cart

@@ -19,7 +19,7 @@ export default function Home() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-gradient-to-b from-red-100/30 to-background py-4 md:py-6">
+      <section className="relative overflow-hidden bg-gradient-to-b from-red-100/30 to-background py-2 md:py-3">
         <div className="container mx-auto px-4">
           <Carousel
             opts={{
@@ -30,7 +30,7 @@ export default function Home() {
           >
             <CarouselContent>
               <CarouselItem>
-                <div className="relative h-56 md:h-80 w-full rounded-lg overflow-hidden">
+                <div className="relative h-48 md:h-72 w-full rounded-lg overflow-hidden">
                     <Image src="https://picsum.photos/seed/hero1/1200/400" alt="Hero 1" fill className="object-cover" data-ai-hint="sale promotion" />
                     <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center text-white p-4">
                         <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
@@ -46,7 +46,7 @@ export default function Home() {
                 </div>
               </CarouselItem>
                <CarouselItem>
-                <div className="relative h-56 md:h-80 w-full rounded-lg overflow-hidden">
+                <div className="relative h-48 md:h-72 w-full rounded-lg overflow-hidden">
                     <Image src="https://picsum.photos/seed/hero2/1200/400" alt="Hero 2" fill className="object-cover" data-ai-hint="new products" />
                     <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center text-white p-4">
                         <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">

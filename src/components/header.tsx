@@ -27,6 +27,10 @@ export function Header() {
     const formData = new FormData(e.currentTarget);
     const searchQuery = formData.get("search") as string;
     if (searchQuery.trim()) {
+      // Close mobile sheet if open
+      const closeButton = document.querySelector('[data-radix-dialog-close]');
+      if(closeButton instanceof HTMLElement) closeButton.click();
+      
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
@@ -39,73 +43,18 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-sm">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-6">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-lg font-bold text-primary"
-            >
-              <Sparkles className="h-6 w-6" />
-              <span className="font-headline">Digital Direct</span>
-            </Link>
-            <nav className="hidden items-center gap-4 md:flex">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <form onSubmit={handleSearch} className="hidden md:flex">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="search"
-                  name="search"
-                  placeholder="Search products..."
-                  className="h-9 w-40 pl-9 lg:w-64"
-                />
-              </div>
-            </form>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative"
-                onClick={() => setIsCartOpen(true)}
-              >
-                <ShoppingCart className="h-5 w-5" />
-                {cartItemCount > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                    {cartItemCount}
-                  </span>
-                )}
-                <span className="sr-only">Open cart</span>
-              </Button>
-              <Link href="/account">
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                  <span className="sr-only">User account</span>
-                </Button>
-              </Link>
-
-              <div className="md:hidden">
+      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4 gap-4">
+          <div className="flex items-center gap-2 md:gap-6">
+            <div className="md:hidden">
                 <Sheet>
                   <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
-                      <Menu className="h-5 w-5" />
+                      <Menu className="h-6 w-6" />
                       <span className="sr-only">Open menu</span>
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="right" className="w-full max-w-sm">
+                  <SheetContent side="left" className="w-full max-w-xs sm:max-w-sm">
                      <div className="flex h-full flex-col">
                       <div className="flex items-center justify-between border-b pb-4">
                          <Link
@@ -133,22 +82,69 @@ export function Header() {
                           </SheetClose>
                         ))}
                       </nav>
-                       <form onSubmit={handleSearch} className="mt-8">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                          <Input
-                            type="search"
-                            name="search"
-                            placeholder="Search products..."
-                            className="w-full pl-9"
-                          />
-                        </div>
-                      </form>
                     </div>
                   </SheetContent>
                 </Sheet>
               </div>
-            </div>
+            <Link
+              href="/"
+              className="hidden sm:flex items-center gap-2 text-lg font-bold text-primary"
+            >
+              <Sparkles className="h-6 w-6" />
+              <span className="font-headline">Digital Direct</span>
+            </Link>
+          </div>
+
+          <div className="flex-1 px-4">
+              <form onSubmit={handleSearch} className="w-full">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    name="search"
+                    placeholder="Search for products, brands and more"
+                    className="h-10 w-full rounded-full bg-muted/50 border-transparent focus:border-primary focus:bg-background focus:ring-primary pl-10"
+                  />
+                </div>
+              </form>
+          </div>
+
+          <div className="flex items-center gap-2">
+              <Link href="/account" className="hidden sm:block">
+                <Button variant="ghost" size="sm">
+                  <User className="mr-1 h-5 w-5" />
+                  Account
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                onClick={() => setIsCartOpen(true)}
+              >
+                <ShoppingCart className="h-6 w-6" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+                    {cartItemCount}
+                  </span>
+                )}
+                <span className="sr-only">Open cart</span>
+              </Button>
+          </div>
+        </div>
+        <div className="hidden md:block border-t">
+          <div className="container mx-auto px-4">
+             <nav className="flex items-center gap-6">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
           </div>
         </div>
       </header>

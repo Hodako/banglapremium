@@ -1,13 +1,15 @@
 import { ReactNode } from "react";
 import Link from "next/link";
-import { User, Package, Heart } from "lucide-react";
+import { User, Package, Heart, LogOut, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
     { href: "/account", label: "Profile", icon: User },
     { href: "/account/orders", label: "My Orders", icon: Package },
+    { href: "#", label: "Track Order", icon: MapPin },
     { href: "#", label: "Wishlist", icon: Heart },
+    { href: "#", label: "Sign Out", icon: LogOut },
 ];
 
 export default function AccountLayout({ children }: { children: ReactNode }) {

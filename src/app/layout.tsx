@@ -6,6 +6,14 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { CartProvider } from '@/context/cart-context';
 import { OfferBanner } from '@/components/offer-banner';
+import { Noto_Sans } from 'next/font/google';
+
+const noto = Noto_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '700', '800'],
+  variable: '--font-noto-sans',
+});
+
 
 export const metadata: Metadata = {
   title: 'Digital Direct',
@@ -19,12 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
-      </head>
-      <body className={cn('min-h-screen bg-background font-body antialiased')}>
+      <body className={cn('min-h-screen bg-background font-body antialiased', noto.variable)}>
         <CartProvider>
           <div className="relative flex min-h-dvh flex-col">
             <OfferBanner />

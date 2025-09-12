@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
 import type { Product } from "@/lib/types";
 import { ShoppingCart } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface ProductCardProps {
   product: Product;
@@ -16,29 +17,32 @@ export function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
 
   return (
-    <Card className="flex h-full flex-col overflow-hidden transition-all hover:shadow-lg">
-      <CardHeader className="p-0">
+    <Card className="flex h-full flex-col overflow-hidden transition-all hover:shadow-lg group">
+      <div className="p-0">
         <Link href={`/products/${product.slug}`}>
-          <div className="relative aspect-video">
+          <div className="relative aspect-square">
             <Image
               src={product.imageUrl}
               alt={product.name}
               fill
-              className="object-cover"
+              className="object-cover transition-transform group-hover:scale-105"
               data-ai-hint={product.imageHint}
             />
           </div>
         </Link>
-      </CardHeader>
-      <CardContent className="flex-grow p-4">
-        <Link href={`/products/${product.slug}`}>
-          <CardTitle className="mb-2 text-lg font-semibold hover:text-primary">{product.name}</CardTitle>
+      </div>
+      <CardContent className="flex-grow p-3 flex flex-col">
+        <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
+        <Link href={`/products/${product.slug}`} className="flex-grow">
+          <h3 className="text-sm font-medium leading-tight mb-2 group-hover:text-primary">{product.name}</h3>
         </Link>
-        <p className="text-sm text-muted-foreground">{product.description}</p>
+         <div className="flex items-center justify-between mt-auto">
+            <p className="text-lg font-bold text-primary">${product.price.toFixed(2)}</p>
+            {product.isBestSelling && <Badge variant="secondary" className="text-xs bg-yellow-400/80 text-yellow-900">Best Seller</Badge>}
+        </div>
       </CardContent>
-      <CardFooter className="flex items-center justify-between p-4 pt-0">
-        <p className="text-lg font-bold text-primary">${product.price.toFixed(2)}</p>
-        <Button onClick={() => addToCart(product)}>
+      <CardFooter className="p-3 pt-0">
+        <Button onClick={() => addToCart(product)} className="w-full" size="sm">
           <ShoppingCart className="mr-2 h-4 w-4" />
           Add to Cart
         </Button>

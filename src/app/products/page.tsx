@@ -7,8 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -27,11 +25,7 @@ export default function ProductsPage() {
         <p className="mt-2 text-lg text-muted-foreground">Find the perfect digital service for you.</p>
       </div>
       
-      <div className="mb-8 flex flex-col gap-4 rounded-lg border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search within products..." className="pl-9" />
-        </div>
+      <div className="mb-8 flex flex-col gap-4 rounded-lg border bg-card p-4 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex flex-shrink-0 gap-4">
           <Select>
             <SelectTrigger className="w-full sm:w-[180px]">

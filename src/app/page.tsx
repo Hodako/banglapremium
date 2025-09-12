@@ -3,7 +3,6 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { products } from '@/lib/data';
 import { ProductCard } from '@/components/product-card';
-import { ProductRecommendations } from '@/components/product-recommendations';
 import { ArrowRight, Star, Tag } from 'lucide-react';
 import {
   Carousel,
@@ -19,24 +18,52 @@ export default function Home() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-primary/10 py-20 md:py-32">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="font-headline text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl">
-            Your Digital Subscriptions, Simplified.
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Instantly access premium digital services. One platform, all your subscriptions, hassle-free.
-          </p>
-          <div className="mt-8 flex justify-center gap-4">
-            <Button asChild size="lg">
-              <Link href="/products">
-                Explore Products <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link href="#">Learn More</Link>
-            </Button>
-          </div>
+      <section className="relative overflow-hidden bg-gradient-to-b from-red-100/30 to-background py-12 md:py-20">
+        <div className="container mx-auto px-4">
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent>
+              <CarouselItem>
+                <div className="relative h-64 md:h-96 w-full rounded-lg overflow-hidden">
+                    <Image src="https://picsum.photos/seed/hero1/1200/400" alt="Hero 1" fill className="object-cover" data-ai-hint="sale promotion" />
+                    <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center text-white p-4">
+                        <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
+                            Digital Deals Galore
+                        </h1>
+                        <p className="mt-4 max-w-xl text-lg">
+                            Get the best prices on your favorite digital subscriptions.
+                        </p>
+                        <Button asChild size="lg" className="mt-6">
+                            <Link href="/products">Shop Now <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                        </Button>
+                    </div>
+                </div>
+              </CarouselItem>
+               <CarouselItem>
+                <div className="relative h-64 md:h-96 w-full rounded-lg overflow-hidden">
+                    <Image src="https://picsum.photos/seed/hero2/1200/400" alt="Hero 2" fill className="object-cover" data-ai-hint="new products" />
+                    <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center text-white p-4">
+                        <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
+                            Fresh Arrivals
+                        </h1>
+                        <p className="mt-4 max-w-xl text-lg">
+                            Check out the latest additions to our collection.
+                        </p>
+                        <Button asChild size="lg" className="mt-6">
+                            <Link href="/products">Explore <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                        </Button>
+                    </div>
+                </div>
+              </CarouselItem>
+            </CarouselContent>
+            <CarouselPrevious className="hidden sm:flex left-4 text-white" />
+            <CarouselNext className="hidden sm:flex right-4 text-white" />
+          </Carousel>
         </div>
       </section>
 
@@ -54,13 +81,12 @@ export default function Home() {
           <Carousel
             opts={{
               align: "start",
-              loop: true,
             }}
             className="w-full"
           >
             <CarouselContent>
               {featuredProducts.map((product) => (
-                <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/3">
+                <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
                   <div className="p-1">
                     <ProductCard product={product} />
                   </div>
@@ -84,15 +110,13 @@ export default function Home() {
               <Link href="/products">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {bestSellingProducts.slice(0, 4).map((product) => (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
+            {bestSellingProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         </div>
       </section>
-      
-      <ProductRecommendations />
     </div>
   );
 }

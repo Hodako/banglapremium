@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -7,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useCart } from "@/context/cart-context";
 import { CartSheet } from "@/components/cart-sheet";
 import { FormEvent, useState, useRef, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Sheet,
   SheetContent,
@@ -20,6 +21,7 @@ import Image from "next/image";
 export function Header() {
   const { cart } = useCart();
   const router = useRouter();
+  const pathname = usePathname();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<typeof products>([]);
@@ -99,21 +101,21 @@ export function Header() {
                           <span className="font-headline">Digital Direct</span>
                         </Link>
                         <SheetClose asChild>
-                           <Button variant="ghost" size="icon">
+                           <Button variant="ghost" size="icon" data-radix-dialog-close>
                             <X className="h-5 w-5" />
                           </Button>
                         </SheetClose>
                       </div>
                       <nav className="mt-8 flex flex-col gap-4">
                         {navLinks.map((link) => (
-                          <SheetClose asChild key={link.href}>
-                             <Link
+                           <Link
+                              key={link.href}
                               href={link.href}
-                              className="text-lg font-medium"
+                              className={`text-lg font-medium ${pathname === link.href ? 'text-primary' : ''}`}
+                               onClick={closeMobileMenu}
                             >
                               {link.label}
                             </Link>
-                          </SheetClose>
                         ))}
                       </nav>
                       <div className="mt-auto border-t pt-4">
@@ -121,6 +123,12 @@ export function Header() {
                           <Button variant="ghost" className="w-full justify-start">
                             <User className="mr-2 h-5 w-5" />
                             Account
+                          </Button>
+                        </Link>
+                         <Link href="/login" onClick={closeMobileMenu}>
+                          <Button variant="ghost" className="w-full justify-start">
+                            <User className="mr-2 h-5 w-5" />
+                            Login / Signup
                           </Button>
                         </Link>
                       </div>
@@ -207,21 +215,21 @@ export function Header() {
               </Button>
           </div>
         </div>
-        <div className="hidden md:block border-t">
+        <nav className="hidden md:block border-t">
           <div className="container mx-auto px-4">
-             <nav className="flex items-center gap-6">
+             <div className="flex items-center gap-6">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  className={`py-2 text-sm font-medium transition-colors hover:text-foreground ${pathname === link.href ? 'text-primary' : 'text-muted-foreground'}`}
                 >
                   {link.label}
                 </Link>
               ))}
-            </nav>
+            </div>
           </div>
-        </div>
+        </nav>
       </header>
       <CartSheet open={isCartOpen} onOpenChange={setIsCartOpen} />
     </>

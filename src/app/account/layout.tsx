@@ -1,3 +1,4 @@
+
 import { ReactNode } from "react";
 import Link from "next/link";
 import { User, Package, Heart, LogOut, MapPin } from "lucide-react";
@@ -7,9 +8,9 @@ import { Button } from "@/components/ui/button";
 const navItems = [
     { href: "/account", label: "Profile", icon: User },
     { href: "/account/orders", label: "My Orders", icon: Package },
-    { href: "/account/orders", label: "Track Order", icon: MapPin },
+    { href: "/account/track-order", label: "Track Order", icon: MapPin },
     { href: "#", label: "Wishlist", icon: Heart },
-    { href: "#", label: "Sign Out", icon: LogOut },
+    { href: "/login", label: "Sign Out", icon: LogOut },
 ];
 
 export default function AccountLayout({ children }: { children: ReactNode }) {

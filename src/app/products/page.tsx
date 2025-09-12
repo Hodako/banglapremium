@@ -1,3 +1,4 @@
+
 'use client';
 
 import { products, categories } from '@/lib/data';
@@ -9,27 +10,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Metadata } from 'next';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+  SheetClose
+} from "@/components/ui/sheet";
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ListFilter, X } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 
 const PRODUCTS_PER_PAGE = 8;
 
-export default function ProductsPage() {
+function Filters({ isMobile }: { isMobile: boolean }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  const [priceRange, setPriceRange] = useState<[number]>([50]);
-
-  const category = searchParams.get('category') || 'all';
-  const sort = searchParams.get('sort') || 'popularity';
-  const page = Number(searchParams.get('page')) || 1;
-  const maxPrice = Number(searchParams.get('price')) || 50;
+  const [priceRange, setPriceRange] = useState<[number]>([Number(searchParams.get('price')) || 50]);
+  const [currentCategory, setCurrentCategory] = useState(searchParams.get('category') || 'all');
+  const [currentSort, setCurrentSort] = useState(searchParams.get('sort') || 'popularity');
 
   const handleFilterChange = (type: 'category' | 'sort' | 'price', value: string | number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -39,14 +48,81 @@ export default function ProductsPage() {
     }
     router.push(`${pathname}?${params.toString()}`);
   };
-  
-  const handlePriceChange = (value: number[]) => {
-    setPriceRange([value[0]]);
-  }
 
   const handlePriceCommit = (value: number[]) => {
+    setPriceRange([value[0]]);
     handleFilterChange('price', value[0]);
   }
+  
+  const resetFilters = () => {
+    setPriceRange([50]);
+    setCurrentCategory('all');
+    setCurrentSort('popularity');
+    router.push(pathname);
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Filters</h3>
+          <Button variant="ghost" size="sm" onClick={resetFilters}>Reset</Button>
+      </div>
+      <div>
+        <Label className="text-base">Category</Label>
+        <Select value={currentCategory} onValueChange={(value) => { setCurrentCategory(value); handleFilterChange('category', value)}}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Filter by category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories.map(cat => (
+              <SelectItem key={cat.id} value={cat.slug}>{cat.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <Label htmlFor="price-range" className="text-base">Max Price: ${priceRange[0]}</Label>
+        <Slider
+          id="price-range"
+          min={0}
+          max={50}
+          step={1}
+          value={priceRange}
+          onValueChange={setPriceRange}
+          onValueCommit={handlePriceCommit}
+          className="mt-2"
+        />
+      </div>
+       <div>
+        <Label className="text-base">Sort By</Label>
+        <Select value={currentSort} onValueChange={(value) => { setCurrentSort(value); handleFilterChange('sort', value)}}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="popularity">Popularity</SelectItem>
+            <SelectItem value="price-asc">Price: Low to High</SelectItem>
+            <SelectItem value="price-desc">Price: High to Low</SelectItem>
+            <SelectItem value="newest">Newest</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  )
+}
+
+export default function ProductsPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const isMobile = useIsMobile();
+  
+  const category = searchParams.get('category') || 'all';
+  const sort = searchParams.get('sort') || 'popularity';
+  const page = Number(searchParams.get('page')) || 1;
+  const maxPrice = Number(searchParams.get('price')) || 50;
+
 
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = products;
@@ -92,6 +168,38 @@ export default function ProductsPage() {
     params.set('page', String(newPage));
     router.push(`${pathname}?${params.toString()}`);
   }
+  
+  const FilterComponent = isMobile ? (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="outline" className="w-full">
+          <ListFilter className="mr-2 h-4 w-4" />
+          Filters
+        </Button>
+      </SheetTrigger>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>Filter Products</SheetTitle>
+          <SheetDescription>
+            Refine your search to find the perfect product.
+          </SheetDescription>
+        </SheetHeader>
+        <div className="py-4">
+          <Filters isMobile={true} />
+        </div>
+        <SheetFooter>
+            <SheetClose asChild>
+                <Button className="w-full">Apply Filters</Button>
+            </SheetClose>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  ) : (
+      <aside className="md:col-span-1 p-4 border rounded-lg bg-card sticky top-24">
+        <Filters isMobile={false}/>
+      </aside>
+  );
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -100,58 +208,14 @@ export default function ProductsPage() {
         <p className="mt-2 text-lg text-muted-foreground">Find the perfect digital service for you.</p>
       </div>
       
-      <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-        <aside className="md:col-span-1 p-4 border rounded-lg bg-card sticky top-24">
-          <h3 className="text-lg font-semibold mb-4">Filters</h3>
-          <div className="space-y-6">
-            <div>
-              <Label className="text-base">Category</Label>
-              <Select value={category} onValueChange={(value) => handleFilterChange('category', value)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Filter by category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map(cat => (
-                    <SelectItem key={cat.id} value={cat.slug}>{cat.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="price-range" className="text-base">Max Price: ${priceRange[0]}</Label>
-              <Slider
-                id="price-range"
-                min={0}
-                max={50}
-                step={1}
-                value={priceRange}
-                onValueChange={handlePriceChange}
-                onValueCommit={handlePriceCommit}
-                className="mt-2"
-              />
-            </div>
-             <div>
-              <Label className="text-base">Sort By</Label>
-              <Select value={sort} onValueChange={(value) => handleFilterChange('sort', value)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="popularity">Popularity</SelectItem>
-                  <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                  <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                  <SelectItem value="newest">Newest</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </aside>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+        {isMobile && <div className="md:hidden">{FilterComponent}</div>}
+        {!isMobile && FilterComponent}
 
         <main className="md:col-span-3">
            {paginatedProducts.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
                 {paginatedProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -181,7 +245,7 @@ export default function ProductsPage() {
               )}
             </>
            ) : (
-             <div className="text-center py-16">
+             <div className="text-center py-16 col-span-3">
                 <h2 className="text-xl font-semibold">No products found</h2>
                 <p className="mt-2 text-muted-foreground">Try adjusting your filters.</p>
               </div>

@@ -42,9 +42,13 @@ export function Header() {
     };
 
     window.addEventListener('storage', handleStorageChange);
+    // Also listen for a custom event that we can dispatch on login/logout
+    window.addEventListener('authChange', handleStorageChange);
+
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('authChange', handleStorageChange);
     };
   }, []);
 

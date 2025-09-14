@@ -34,7 +34,6 @@ async function main() {
   for (const category of categories) {
     await prisma.category.create({
       data: {
-        // id: category.id, // Let Prisma handle ID generation
         name: category.name,
         slug: category.slug,
         description: category.description,
@@ -55,7 +54,6 @@ async function main() {
      if (categoryInDb) {
         await prisma.product.create({
             data: {
-                // id: product.id, // Let Prisma handle ID generation
                 name: product.name,
                 slug: product.slug,
                 description: product.description,

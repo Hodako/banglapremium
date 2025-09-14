@@ -73,10 +73,10 @@ export default function CheckoutPage() {
     if (status === 'unauthenticated') {
         router.push('/login?callbackUrl=/checkout');
     }
-    if (cart.length === 0 && status === 'authenticated') {
+    if (status === 'authenticated' && cart.length === 0) {
       router.replace("/products");
     }
-  }, [cart, router, user, status]);
+  }, [cart.length, router, status]);
 
   const onSubmit = (data: CheckoutFormValues) => {
     console.log("Checkout data:", data);
@@ -85,7 +85,7 @@ export default function CheckoutPage() {
     router.push(`/order-confirmation?total=${total.toFixed(2)}`);
   };
 
-  if (status === 'loading' || cart.length === 0 || !user) {
+  if (status === 'loading' || (status === 'authenticated' && cart.length === 0) || !user) {
     return (
         <div className="container mx-auto flex h-[60vh] flex-col items-center justify-center gap-4 px-4 text-center">
             <p>Loading...</p>

@@ -24,5 +24,7 @@ import { products } from '@/lib/data';
  *     ]
  */
 export async function GET() {
+  // In a real application, you would fetch this from your database
+  // Example: const allProducts = await db.select().from(productsTable);
   return NextResponse.json(products);
 }

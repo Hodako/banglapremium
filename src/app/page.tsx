@@ -79,7 +79,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-8 md:py-10">
+      <section className="pt-4 pb-8 md:pt-6 md:pb-10">
         <div className="container mx-auto px-4">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-2xl font-bold tracking-tight md:text-3xl font-headline">

@@ -29,19 +29,47 @@ export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignup = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast({
-      title: "Account Created",
-      description: "Welcome! Please log in to continue.",
-    });
-    router.push("/login");
+    setIsLoading(true);
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await fetch('/api/auth/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.message || 'Signup failed');
+        }
+
+        toast({
+            title: "Account Created",
+            description: "Welcome! Please log in to continue.",
+        });
+        router.push("/login");
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+        toast({
+            variant: "destructive",
+            title: "Signup Failed",
+            description: errorMessage,
+        });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (
     <div className="container mx-auto flex min-h-[80vh] items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md border-0 shadow-none sm:border sm:shadow-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Create an Account</CardTitle>
           <CardDescription>
@@ -52,21 +80,23 @@ export default function SignupPage() {
           <CardContent className="space-y-4">
              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="first-name">First Name</Label>
-                  <Input id="first-name" placeholder="John" required />
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input id="firstName" name="firstName" placeholder="John" required disabled={isLoading} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="last-name">Last Name</Label>
-                  <Input id="last-name" placeholder="Doe" required />
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input id="lastName" name="lastName" placeholder="Doe" required disabled={isLoading} />
                 </div>
               </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="m@example.com"
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -74,8 +104,10 @@ export default function SignupPage() {
                <div className="relative">
                 <Input
                   id="password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
                   required
+                  disabled={isLoading}
                 />
                  <Button
                     type="button"
@@ -83,6 +115,7 @@ export default function SignupPage() {
                     size="icon"
                     className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={isLoading}
                   >
                     {showPassword ? <EyeOff /> : <Eye />}
                     <span className="sr-only">Toggle password visibility</span>
@@ -91,14 +124,14 @@ export default function SignupPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full">
-              Create Account
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
             <div className="relative w-full">
                 <Separator className="absolute left-0 top-1/2 -translate-y-1/2 w-full" />
                 <span className="relative z-10 bg-card px-2 text-xs uppercase text-muted-foreground">Or continue with</span>
             </div>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" type="button">
                 <GoogleIcon />
                 Sign up with Google
             </Button>

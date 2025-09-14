@@ -29,6 +29,24 @@ export function Header() {
   const [suggestions, setSuggestions] = useState<typeof products>([]);
   const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+   useEffect(() => {
+    // Check for token to determine login status
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+
+    const handleStorageChange = () => {
+      const token = localStorage.getItem("token");
+      setIsLoggedIn(!!token);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -117,17 +135,20 @@ export function Header() {
                         ))}
                       </nav>
                       <div className="mt-auto border-t pt-4 flex flex-col gap-2">
-                           <Link href="/account" onClick={closeMobileMenu}>
-                            <Button variant="ghost" className="w-full justify-start">
-                                <User className="mr-2 h-5 w-5" />
-                                My Account
-                            </Button>
-                           </Link>
-                            <Link href="/login" onClick={closeMobileMenu}>
-                                <Button variant="outline" className="w-full justify-center">
-                                    Login / Signup
-                                </Button>
-                            </Link>
+                           {isLoggedIn ? (
+                             <Link href="/account" onClick={closeMobileMenu}>
+                               <Button variant="ghost" className="w-full justify-start">
+                                 <User className="mr-2 h-5 w-5" />
+                                 My Account
+                               </Button>
+                             </Link>
+                           ) : (
+                             <Link href="/login" onClick={closeMobileMenu}>
+                               <Button variant="outline" className="w-full justify-center">
+                                 Login / Signup
+                               </Button>
+                             </Link>
+                           )}
                       </div>
                     </div>
                   </SheetContent>

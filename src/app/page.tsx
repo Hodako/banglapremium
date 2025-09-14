@@ -24,7 +24,7 @@ export default function Home() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-gradient-to-b from-red-100/30 to-background py-2">
+      <section className="relative overflow-hidden bg-gradient-to-b from-red-100/30 to-background pt-2 pb-0">
         <div className="container mx-auto px-4">
           <Carousel
             plugins={[

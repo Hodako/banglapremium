@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { Star } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Best Sellers | Digital Direct',
+  title: 'Best Sellers | Bangla Premium',
   description: 'Our most popular digital products and subscriptions.',
 };
 

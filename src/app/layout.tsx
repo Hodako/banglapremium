@@ -17,7 +17,7 @@ const noto = Noto_Sans({
 
 
 export const metadata: Metadata = {
-  title: 'Digital Direct',
+  title: 'Bangla Premium',
   description: 'Your one-stop shop for digital subscriptions and services.',
 };
 

@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const metadata: Metadata = {
-  title: 'Terms and Conditions | Digital Direct',
-  description: 'Read the terms and conditions for using the Digital Direct website and services.',
+  title: 'Terms and Conditions | Bangla Premium',
+  description: 'Read the terms and conditions for using the Bangla Premium website and services.',
 };
 
 export default function TermsAndConditionsPage() {
@@ -24,10 +24,10 @@ export default function TermsAndConditionsPage() {
           <h3>Definitions</h3>
           <p>For the purposes of these Terms and Conditions:</p>
           <ul>
-            <li><strong>"Company"</strong> (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to Digital Direct.</li>
+            <li><strong>"Company"</strong> (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to Bangla Premium.</li>
             <li><strong>"Service"</strong> refers to the Website.</li>
             <li><strong>"Terms and Conditions"</strong> (also referred as "Terms") mean these Terms and Conditions that form the entire agreement between You and the Company regarding the use of the Service.</li>
-            <li><strong>"Website"</strong> refers to Digital Direct, accessible from [Your Website URL]</li>
+            <li><strong>"Website"</strong> refers to Bangla Premium, accessible from [Your Website URL]</li>
             <li><strong>"You"</strong> means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.</li>
           </ul>
 
@@ -45,7 +45,7 @@ export default function TermsAndConditionsPage() {
           <p>We reserve the right, at Our sole discretion, to modify or replace these Terms at any time. If a revision is material We will make reasonable efforts to provide at least 30 days' notice prior to any new terms taking effect.</p>
 
           <h2>Contact Us</h2>
-          <p>If you have any questions about these Terms and Conditions, You can contact us by email: support@digitaldirect.com</p>
+          <p>If you have any questions about these Terms and Conditions, You can contact us by email: support@banglapremium.com</p>
         </CardContent>
       </Card>
     </div>

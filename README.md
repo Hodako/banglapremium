@@ -1,4 +1,4 @@
-# Firebase Studio
+# Bangla Premium
 
 This is a NextJS starter in Firebase Studio.
 

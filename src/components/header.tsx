@@ -105,7 +105,7 @@ export function Header() {
                                 onClick={closeMobileMenu}
                                 >
                                 <Sparkles className="h-6 w-6" />
-                                <span className="font-headline">Digital Direct</span>
+                                <span className="font-headline">Bangla Premium</span>
                             </Link>
                         </SheetTitle>
                     </SheetHeader>
@@ -157,7 +157,7 @@ export function Header() {
               className="hidden sm:flex items-center gap-2 text-lg font-bold text-primary"
             >
               <Sparkles className="h-6 w-6" />
-              <span className="font-headline">Digital Direct</span>
+              <span className="font-headline">Bangla Premium</span>
             </Link>
           </div>
 

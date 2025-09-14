@@ -15,11 +15,11 @@ export default function AdminSettingsPage() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="store-name">Store Name</Label>
-            <Input id="store-name" defaultValue="Digital Direct" />
+            <Input id="store-name" defaultValue="Bangla Premium" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="store-email">Support Email</Label>
-            <Input id="store-email" type="email" defaultValue="support@digitaldirect.com" />
+            <Input id="store-email" type="email" defaultValue="support@banglapremium.com" />
           </div>
            <div className="flex items-center space-x-2">
             <Switch id="store-open" defaultChecked />

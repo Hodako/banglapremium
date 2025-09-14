@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${category.name} | Digital Direct`,
+    title: `${category.name} | Bangla Premium`,
     description: `Browse products in the ${category.name} category.`,
   };
 }

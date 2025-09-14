@@ -9,7 +9,7 @@ export function Footer() {
           <div className="flex flex-col gap-4">
             <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary">
               <Sparkles className="h-6 w-6" />
-              <span className="font-headline">Digital Direct</span>
+              <span className="font-headline">Bangla Premium</span>
             </Link>
             <p className="text-muted-foreground">
               Your one-stop shop for digital subscriptions and services.
@@ -42,7 +42,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Digital Direct. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Bangla Premium. All rights reserved.</p>
         </div>
       </div>
     </footer>

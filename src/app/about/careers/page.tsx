@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Briefcase } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Careers | Digital Direct',
-  description: 'Join the team at Digital Direct and help us shape the future of digital commerce.',
+  title: 'Careers | Bangla Premium',
+  description: 'Join the team at Bangla Premium and help us shape the future of digital commerce.',
 };
 
 const jobOpenings = [
@@ -22,7 +22,7 @@ const jobOpenings = [
   {
     title: 'Customer Support Specialist',
     location: 'Remote',
-    description: 'Be the voice of Digital Direct and provide exceptional support to our valued customers.'
+    description: 'Be the voice of Bangla Premium and provide exceptional support to our valued customers.'
   }
 ];
 

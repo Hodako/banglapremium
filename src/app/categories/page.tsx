@@ -6,7 +6,7 @@ import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Categories | Digital Direct',
+  title: 'Categories | Bangla Premium',
   description: 'Explore products by category.',
 };
 

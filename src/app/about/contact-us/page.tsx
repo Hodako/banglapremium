@@ -1,6 +1,5 @@
 'use client';
 
-import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,11 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Phone, MapPin } from 'lucide-react';
-
-// export const metadata: Metadata = {
-//   title: 'Contact Us | Digital Direct',
-//   description: 'Get in touch with the Digital Direct team.',
-// };
 
 export default function ContactUsPage() {
   const { toast } = useToast();
@@ -49,7 +43,7 @@ export default function ContactUsPage() {
                     <Mail className="h-6 w-6 text-primary mt-1" />
                     <div>
                         <h3 className="font-semibold text-foreground">Email Us</h3>
-                        <p>support@digitaldirect.com</p>
+                        <p>support@banglapremium.com</p>
                     </div>
                 </div>
                  <div className="flex items-start gap-4">

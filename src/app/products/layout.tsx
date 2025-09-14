@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
 export const metadata = {
-  title: 'All Products | Digital Direct',
+  title: 'All Products | Bangla Premium',
   description: 'Browse all available digital products and subscriptions.',
 };
 

@@ -12,22 +12,29 @@ export async function POST(request: Request) {
     }
 
     // --- Placeholder Logic ---
+    // In a real app, you would:
     // 1. Find user in your database
     // const user = await db.users.findUnique({ where: { email } });
-    const user = { id: '1', name: 'John Doe', email: 'john.doe@example.com', passwordHash: 'hashed_password_from_db', role: 'customer' };
+    
+    let user: any;
+    let isPasswordValid = false;
 
-    if (!user) {
+    if (email === "admin" && password === "password123") {
+      user = { id: 'admin-user', name: 'Admin', email: 'admin@example.com', passwordHash: 'hashed_password_from_db', role: 'admin' };
+      isPasswordValid = true;
+    } else if (email === "john.doe@example.com" && password === "password123") {
+      user = { id: '1', name: 'John Doe', email: 'john.doe@example.com', passwordHash: 'hashed_password_from_db', role: 'customer' };
+      isPasswordValid = true;
+    }
+
+
+    if (!user || !isPasswordValid) {
         return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
     }
 
     // 2. Compare password with the hashed password from the database
     // const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    const isPasswordValid = password === "password123"; // Replace with real password check
-
-    if (!isPasswordValid) {
-        return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
-    }
-
+    
     // 3. Generate a JWT token
     // const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
     const token = 'demo-jwt-token-for-testing'; // Replace with real JWT generation

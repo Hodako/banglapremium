@@ -2,7 +2,7 @@ import type { Product, Category, Order, User } from '@/lib/types';
 
 export const categories: Category[] = [
   {
-    id: '1',
+    id: 'cat-1',
     name: 'Entertainment',
     slug: 'entertainment',
     description: 'Streaming, gaming, and more for your entertainment needs.',
@@ -10,7 +10,7 @@ export const categories: Category[] = [
     imageHint: 'cinema screen',
   },
   {
-    id: '2',
+    id: 'cat-2',
     name: 'Social Media',
     slug: 'social-media',
     description: 'Enhance your social media experience with premium features.',
@@ -18,7 +18,7 @@ export const categories: Category[] = [
     imageHint: 'social network',
   },
   {
-    id: '3',
+    id: 'cat-3',
     name: 'Professional',
     slug: 'professional',
     description: 'Tools and services to boost your career and productivity.',
@@ -26,7 +26,7 @@ export const categories: Category[] = [
     imageHint: 'office meeting',
   },
   {
-    id: '4',
+    id: 'cat-4',
     name: 'Music',
     slug: 'music',
     description: 'Listen to your favorite music ad-free and offline.',
@@ -167,7 +167,7 @@ export const customers: User[] = [
     },
      {
         id: 'user-003',
-        name: 'Admin User',
+        name: 'Admin',
         email: 'admin@example.com',
         role: 'admin',
         createdAt: '2023-01-01T09:00:00Z',

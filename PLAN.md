@@ -44,14 +44,15 @@ To build a professional-grade, SEO-friendly, and fully responsive e-commerce app
 - Create the main pages for the storefront (Homepage, Products, Cart, etc.).
 - Implement a responsive layout.
 
-### Phase 2: Backend & Database Integration (Current)
-- Define the database schema using Prisma.
+### Phase 2: Backend & Database Integration (Complete)
+- Define the database schema using Prisma (`prisma/schema.prisma`).
 - Set up API routes for all backend functionality (auth, products, orders).
-- Implement a database seeding script to populate the database with initial data, including an admin account.
-- Integrate `next-auth` for a complete and secure authentication flow.
-- Replace all mock data and logic with real database interactions.
+- Implement a database seeding script (`prisma/seed.ts`) to populate the database with initial data, including a default admin account (`admin@example.com` / `password123`).
+- Integrate `next-auth` for a complete and secure authentication flow with Credentials and Google providers.
+- Replace all mock data and logic with real database interactions and session management.
+- Create simple batch scripts (`setup.bat`, `start.bat`) for a one-click local startup process.
 
-### Phase 3: Admin Panel Functionality
+### Phase 3: Admin Panel Functionality (Current)
 - Build out the admin panel pages for managing products, orders, and users.
 - Connect the admin UI to the backend API routes.
 - Implement charts and analytics on the admin dashboard.
@@ -60,5 +61,4 @@ To build a professional-grade, SEO-friendly, and fully responsive e-commerce app
 ### Phase 4: Finalization & Deployment
 - Conduct thorough testing of all features.
 - Perform SEO and performance optimizations.
-- Prepare documentation for local setup and deployment.
-- Create simple batch scripts (`setup.bat`, `start.bat`) for an easy local startup process.
+- Prepare final documentation for deployment.

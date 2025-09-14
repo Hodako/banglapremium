@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,6 +18,9 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { signIn } from "next-auth/react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Terminal } from "lucide-react";
 
 function GoogleIcon() {
   return (
@@ -25,50 +28,41 @@ function GoogleIcon() {
   )
 }
 
-
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  const callbackUrl = searchParams.get('callbackUrl') || '/account';
+  const error = searchParams.get('error');
+
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Something went wrong');
+      if (result?.error) {
+        throw new Error(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error);
       }
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("loggedInUser", JSON.stringify(data.user));
-
-
+      
       toast({
         title: "Logged In",
         description: "Welcome back!",
       });
-      
-      const redirectPath = localStorage.getItem('checkoutRedirect');
-      if (redirectPath) {
-        localStorage.removeItem('checkoutRedirect');
-        router.push(redirectPath);
-      } else {
-        router.push("/account");
-      }
+
+      router.push(callbackUrl);
+
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
@@ -81,6 +75,11 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    await signIn('google', { callbackUrl });
+  }
+
   return (
     <div className="container mx-auto flex min-h-[80vh] items-center justify-center px-4 py-12">
       <Card className="w-full max-w-md border-0 shadow-none sm:border sm:shadow-sm">
@@ -92,6 +91,15 @@ export default function LoginPage() {
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
+             {error && (
+                <Alert variant="destructive">
+                    <Terminal className="h-4 w-4" />
+                    <AlertTitle>Login Failed</AlertTitle>
+                    <AlertDescription>
+                        Invalid email or password. Please try again.
+                    </AlertDescription>
+                </Alert>
+             )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -145,7 +153,7 @@ export default function LoginPage() {
                 <Separator className="absolute left-0 top-1/2 -translate-y-1/2 w-full" />
                 <span className="relative z-10 bg-card px-2 text-xs uppercase text-muted-foreground">Or continue with</span>
             </div>
-             <Button variant="outline" className="w-full" type="button">
+             <Button variant="outline" className="w-full" type="button" onClick={handleGoogleSignIn} disabled={isLoading}>
                 <GoogleIcon />
                 Sign in with Google
             </Button>

@@ -7,6 +7,7 @@ import { Footer } from '@/components/footer';
 import { CartProvider } from '@/context/cart-context';
 import { OfferBanner } from '@/components/offer-banner';
 import { Noto_Sans } from 'next/font/google';
+import { SessionProvider } from 'next-auth/react';
 
 const noto = Noto_Sans({
   subsets: ['latin'],
@@ -28,15 +29,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn('min-h-screen bg-background font-body antialiased', noto.variable)}>
-        <CartProvider>
-          <div className="relative flex min-h-dvh flex-col">
-            <OfferBanner />
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-          <Toaster />
-        </CartProvider>
+        <SessionProvider>
+          <CartProvider>
+            <div className="relative flex min-h-dvh flex-col">
+              <OfferBanner />
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+            <Toaster />
+          </CartProvider>
+        </SessionProvider>
       </body>
     </html>
   );

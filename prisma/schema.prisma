@@ -10,6 +10,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
 enum UserRole {
   customer
   admin
@@ -18,13 +53,14 @@ enum UserRole {
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String    @unique
-  emailVerified DateTime? @map("email_verified")
+  email         String?   @unique
+  emailVerified DateTime?
   image         String?
+  password      String?
   role          UserRole  @default(customer)
+  accounts      Account[]
+  sessions      Session[]
   orders        Order[]
-
-  @@map("users")
 }
 
 model Category {
@@ -35,32 +71,28 @@ model Category {
   imageUrl    String?
   imageHint   String?
   products    Product[]
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-
-  @@map("categories")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Product {
-  id              String    @id @default(cuid())
-  name            String
-  slug            String    @unique
-  description     String?
-  longDescription String?
-  price           Decimal   @db.Decimal(10, 2)
-  originalPrice   Decimal?  @db.Decimal(10, 2)
-  imageUrl        String?
-  imageHint       String?
-  isFeatured      Boolean   @default(false)
-  isBestSelling   Boolean   @default(false)
-  releaseDate     DateTime?
-  category        Category? @relation(fields: [categoryId], references: [id])
-  categoryId      String?
-  orderItems      OrderItem[]
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-
-  @@map("products")
+  id               String    @id @default(cuid())
+  name             String
+  slug             String    @unique
+  description      String?
+  longDescription  String?
+  price            Decimal   @db.Decimal(10, 2)
+  originalPrice    Decimal?  @db.Decimal(10, 2)
+  imageUrl         String?
+  imageHint        String?
+  categoryId       String?
+  isFeatured       Boolean   @default(false)
+  isBestSelling    Boolean   @default(false)
+  releaseDate      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  category         Category? @relation(fields: [categoryId], references: [id])
+  orderItems       OrderItem[]
 }
 
 enum OrderStatus {
@@ -73,27 +105,23 @@ enum OrderStatus {
 
 model Order {
   id            String      @id @default(cuid())
-  user          User?       @relation(fields: [userId], references: [id])
   userId        String?
   total         Decimal     @db.Decimal(10, 2)
   status        OrderStatus @default(Pending)
   transactionId String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  user          User?       @relation(fields: [userId], references: [id])
   items         OrderItem[]
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
-
-  @@map("orders")
 }
 
 model OrderItem {
   id             String  @id @default(cuid())
-  order          Order   @relation(fields: [orderId], references: [id])
   orderId        String
-  product        Product @relation(fields: [productId], references: [id])
   productId      String
   quantity       Int
   recipientEmail String?
   price          Decimal @db.Decimal(10, 2) // Price at the time of purchase
-
-  @@map("order_items")
+  order          Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product @relation(fields: [productId], references: [id])
 }

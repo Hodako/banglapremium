@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { signIn } from "next-auth/react";
 
 function GoogleIcon() {
   return (
@@ -38,7 +39,7 @@ export default function SignupPage() {
     const data = Object.fromEntries(formData.entries());
 
     try {
-        const response = await fetch('/api/auth/signup', {
+        const response = await fetch('/api/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -131,7 +132,7 @@ export default function SignupPage() {
                 <Separator className="absolute left-0 top-1/2 -translate-y-1/2 w-full" />
                 <span className="relative z-10 bg-card px-2 text-xs uppercase text-muted-foreground">Or continue with</span>
             </div>
-            <Button variant="outline" className="w-full" type="button">
+            <Button variant="outline" className="w-full" type="button" onClick={() => signIn('google')} disabled={isLoading}>
                 <GoogleIcon />
                 Sign up with Google
             </Button>

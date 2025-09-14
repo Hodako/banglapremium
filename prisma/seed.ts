@@ -1,34 +1,40 @@
 import { PrismaClient } from '@prisma/client'
 import { products, categories } from '../src/lib/data'
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('Start seeding...')
+  console.log('Start seeding...');
+
+  // Clear existing data
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.user.deleteMany();
+  console.log('Cleared previous data.');
 
   // Seed Admin User
   console.log('Seeding admin user...');
-  await prisma.user.upsert({
-    where: { email: 'admin@example.com' },
-    update: {},
-    create: {
+  const hashedPassword = await bcrypt.hash('password123', 10);
+  await prisma.user.create({
+    data: {
       email: 'admin@example.com',
       name: 'Admin',
-      // In a real app, you'd use a hashed password.
-      // This is just for the mock setup.
-      // For this example, password is not stored in the user model.
+      password: hashedPassword,
       role: 'admin',
+      emailVerified: new Date(),
     },
   });
+  console.log('Admin user created.');
 
   // Seed Categories
   console.log('Seeding categories...');
   for (const category of categories) {
-    await prisma.category.upsert({
-      where: { slug: category.slug },
-      update: {},
-      create: {
-        id: category.id,
+    await prisma.category.create({
+      data: {
+        // id: category.id, // Let Prisma handle ID generation
         name: category.name,
         slug: category.slug,
         description: category.description,
@@ -37,20 +43,19 @@ async function main() {
       },
     })
   }
+  console.log('Categories seeded.');
 
   // Seed Products
   console.log('Seeding products...');
   for (const product of products) {
-     const categoryInDb = await prisma.category.findFirst({
+     const categoryInDb = await prisma.category.findUnique({
          where: { name: product.category }
      });
 
      if (categoryInDb) {
-        await prisma.product.upsert({
-            where: { slug: product.slug },
-            update: {},
-            create: {
-                id: product.id,
+        await prisma.product.create({
+            data: {
+                // id: product.id, // Let Prisma handle ID generation
                 name: product.name,
                 slug: product.slug,
                 description: product.description,
@@ -67,16 +72,16 @@ async function main() {
         });
      }
   }
+  console.log('Products seeded.');
 
-  console.log('Seeding finished.')
+  console.log('Seeding finished.');
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect()
-  })
   .catch(async (e) => {
     console.error(e)
-    await prisma.$disconnect()
     process.exit(1)
+  })
+  .finally(async () => {
+    await prisma.$disconnect()
   })

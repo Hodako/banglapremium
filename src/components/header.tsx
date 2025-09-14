@@ -2,13 +2,14 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingCart, User, Menu, X, Sparkles } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, Sparkles, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/context/cart-context";
 import { CartSheet } from "@/components/cart-sheet";
 import { FormEvent, useState, useRef, useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import {
   Sheet,
   SheetContent,
@@ -18,39 +19,22 @@ import {
 } from "@/components/ui/sheet";
 import { products } from "@/lib/data";
 import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 export function Header() {
   const { cart } = useCart();
   const router = useRouter();
   const pathname = usePathname();
+  const { data: session, status } = useSession();
+
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<typeof products>([]);
   const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-   useEffect(() => {
-    // Check for token to determine login status
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-
-    const handleStorageChange = () => {
-      const token = localStorage.getItem("token");
-      setIsLoggedIn(!!token);
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    // Also listen for a custom event that we can dispatch on login/logout
-    window.addEventListener('authChange', handleStorageChange);
-
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('authChange', handleStorageChange);
-    };
-  }, []);
+  
+  const isLoggedIn = status === 'authenticated';
 
   const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -140,12 +124,22 @@ export function Header() {
                       </nav>
                       <div className="mt-auto border-t pt-4 flex flex-col gap-2">
                            {isLoggedIn ? (
-                             <Link href="/account" onClick={closeMobileMenu}>
-                               <Button variant="ghost" className="w-full justify-start">
-                                 <User className="mr-2 h-5 w-5" />
-                                 My Account
+                             <>
+                              <Link href="/account" onClick={closeMobileMenu} className="flex items-center gap-3 p-2 rounded-md transition-colors hover:bg-muted">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarImage src={session.user?.image || ''} />
+                                  <AvatarFallback>{session.user?.name?.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium">{session.user?.name}</span>
+                                  <span className="text-xs text-muted-foreground">My Account</span>
+                                </div>
+                              </Link>
+                               <Button variant="ghost" className="w-full justify-start" onClick={() => { signOut(); closeMobileMenu(); }}>
+                                 <LogOut className="mr-2 h-5 w-5" />
+                                 Sign Out
                                </Button>
-                             </Link>
+                             </>
                            ) : (
                              <Link href="/login" onClick={closeMobileMenu}>
                                <Button variant="outline" className="w-full justify-center">

@@ -27,23 +27,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
+import { useSession } from "next-auth/react";
 
-// Mock user session hook
-const useUser = () => {
-    const [user, setUser] = useState<{ name: string } | null>(null);
-    useEffect(() => {
-        // In a real app, you'd verify the token with your backend
-        const token = localStorage.getItem("token");
-        const storedUser = localStorage.getItem("loggedInUser");
-        if (token && storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-    }, [])
-    return { user };
-}
 
 const checkoutSchema = z.object({
   transactionId: z.string().min(5, "Transaction ID is required"),
@@ -62,7 +50,8 @@ type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 export default function CheckoutPage() {
   const { cart, total, clearCart } = useCart();
   const router = useRouter();
-  const { user } = useUser();
+  const { data: session, status } = useSession();
+  const user = session?.user;
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
@@ -81,14 +70,13 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
-    if (!user) {
-        localStorage.setItem('checkoutRedirect', '/checkout');
-        router.push('/login');
+    if (status === 'unauthenticated') {
+        router.push('/login?callbackUrl=/checkout');
     }
-    if (cart.length === 0 && user) {
+    if (cart.length === 0 && status === 'authenticated') {
       router.replace("/products");
     }
-  }, [cart, router, user]);
+  }, [cart, router, user, status]);
 
   const onSubmit = (data: CheckoutFormValues) => {
     console.log("Checkout data:", data);
@@ -97,8 +85,12 @@ export default function CheckoutPage() {
     router.push(`/order-confirmation?total=${total.toFixed(2)}`);
   };
 
-  if (cart.length === 0 || !user) {
-    return null; // or a loading spinner
+  if (status === 'loading' || cart.length === 0 || !user) {
+    return (
+        <div className="container mx-auto flex h-[60vh] flex-col items-center justify-center gap-4 px-4 text-center">
+            <p>Loading...</p>
+        </div>
+    );
   }
 
   return (

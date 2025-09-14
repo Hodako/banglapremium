@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -36,5 +35,13 @@ export interface Order {
   total: number;
   transactionId: string;
   date: string;
-  status: 'Pending' | 'Completed' | 'Failed';
+  status: 'Pending' | 'Completed' | 'Failed' | 'Processing' | 'Delivered';
+}
+
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+    role: 'customer' | 'admin';
+    createdAt: string;
 }

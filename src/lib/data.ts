@@ -1,4 +1,4 @@
-import type { Product, Category, Order } from '@/lib/types';
+import type { Product, Category, Order, User } from '@/lib/types';
 
 export const categories: Category[] = [
   {
@@ -49,6 +49,7 @@ export const products: Product[] = [
     category: 'Entertainment',
     isFeatured: true,
     isBestSelling: true,
+    releaseDate: '2023-10-01T12:00:00Z',
   },
   {
     id: 'prod_002',
@@ -62,6 +63,7 @@ export const products: Product[] = [
     category: 'Social Media',
     isFeatured: true,
     isBestSelling: false,
+    releaseDate: '2023-09-15T12:00:00Z',
   },
   {
     id: 'prod_003',
@@ -76,6 +78,7 @@ export const products: Product[] = [
     category: 'Professional',
     isFeatured: false,
     isBestSelling: true,
+     releaseDate: '2023-08-20T12:00:00Z',
   },
   {
     id: 'prod_004',
@@ -90,6 +93,7 @@ export const products: Product[] = [
     category: 'Music',
     isFeatured: true,
     isBestSelling: true,
+    releaseDate: '2023-10-05T12:00:00Z',
   },
   {
     id: 'prod_005',
@@ -103,6 +107,7 @@ export const products: Product[] = [
     category: 'Entertainment',
     isFeatured: false,
     isBestSelling: true,
+     releaseDate: '2023-07-11T12:00:00Z',
   },
   {
     id: 'prod_006',
@@ -116,6 +121,7 @@ export const products: Product[] = [
     category: 'Social Media',
     isFeatured: true,
     isBestSelling: false,
+    releaseDate: '2023-10-10T12:00:00Z',
   },
 ];
 
@@ -141,4 +147,43 @@ export const orders: Order[] = [
     date: '2023-10-20',
     status: 'Completed',
   },
+];
+
+
+export const customers: User[] = [
+    {
+        id: 'user-001',
+        name: 'John Doe',
+        email: 'john.doe@example.com',
+        role: 'customer',
+        createdAt: '2023-01-15T10:30:00Z',
+    },
+    {
+        id: 'user-002',
+        name: 'Jane Smith',
+        email: 'jane.smith@example.com',
+        role: 'customer',
+        createdAt: '2023-02-20T14:00:00Z',
+    },
+     {
+        id: 'user-003',
+        name: 'Admin User',
+        email: 'admin@example.com',
+        role: 'admin',
+        createdAt: '2023-01-01T09:00:00Z',
+    },
+    {
+        id: 'user-004',
+        name: 'Alice Johnson',
+        email: 'alice.j@example.com',
+        role: 'customer',
+        createdAt: '2023-03-10T18:45:00Z',
+    },
+    {
+        id: 'user-005',
+        name: 'Bob Williams',
+        email: 'bob.w@example.com',
+        role: 'customer',
+        createdAt: '2023-04-05T11:20:00Z',
+    },
 ];

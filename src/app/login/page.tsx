@@ -49,19 +49,19 @@ export default function LoginPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: true,
+        redirect: false, // Set to false to handle redirection manually
         callbackUrl,
       });
 
-      // The signIn function with redirect: true will handle the navigation.
-      // If it returns, it's usually because of an error that will be handled by the error search param.
-
       if (result?.error) {
-        // This part will likely not be reached with redirect: true,
-        // but it's good for catching non-redirect errors.
         throw new Error(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error);
       }
       
+      // On successful sign-in, NextAuth doesn't throw an error and `result.ok` is true.
+      // We can now redirect the user.
+      router.push(callbackUrl);
+      router.refresh(); // Refresh the page to update session state in the header
+
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
@@ -70,9 +70,7 @@ export default function LoginPage() {
         description: errorMessage,
       });
     } finally {
-      // It's better not to set loading to false here with redirect: true
-      // as the page will be navigating away. If the navigation fails,
-      // the page will reload with an error param.
+      setIsLoading(false);
     }
   };
 

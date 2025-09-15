@@ -50,18 +50,30 @@ export default function LoginPage() {
         redirect: false,
         email,
         password,
+        callbackUrl,
       });
+
 
       if (result?.error) {
         throw new Error(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error);
       }
       
-      toast({
-        title: "Logged In",
-        description: "Welcome back!",
-      });
-
-      router.push(callbackUrl);
+      if(result?.ok) {
+        toast({
+            title: "Logged In",
+            description: "Welcome back!",
+        });
+        
+        const res = await fetch('/api/auth/session');
+        const session = await res.json();
+        
+        // @ts-ignore
+        if (session?.user?.role === 'admin' && (callbackUrl === '/account' || callbackUrl === '/login')) {
+            router.push('/admin');
+        } else {
+            router.push(callbackUrl);
+        }
+      }
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';

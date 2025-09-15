@@ -1,5 +1,3 @@
-
-
 import { NextResponse, type NextRequest } from 'next/server';
 import prisma from '@/lib/db';
 
@@ -15,6 +13,8 @@ export async function GET(request: NextRequest) {
   const sort = searchParams.get('sort') || 'popularity';
   const maxPrice = Number(searchParams.get('price')) || MAX_PRICE;
   const query = searchParams.get('q');
+  const isFeatured = searchParams.get('featured') === 'true';
+  const isBestSelling = searchParams.get('best_selling') === 'true';
 
   const whereClause: any = {
     price: {
@@ -34,6 +34,14 @@ export async function GET(request: NextRequest) {
       { description: { contains: query, mode: 'insensitive' } },
       { category: { name: { contains: query, mode: 'insensitive' } } },
     ];
+  }
+
+  if (isFeatured) {
+    whereClause.isFeatured = true;
+  }
+  
+  if (isBestSelling) {
+    whereClause.isBestSelling = true;
   }
 
   let orderBy: any;

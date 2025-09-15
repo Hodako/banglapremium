@@ -1,33 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+}
 
 generator client {
   provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-enum UserRole {
-  customer
-  admin
-}
-
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          UserRole  @default(customer)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  accounts      Account[]
-  sessions      Session[]
-  orders        Order[]
 }
 
 model Account {
@@ -57,6 +34,21 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String    @default("customer")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  orders        Order[]
+  sessions      Session[]
+}
+
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -72,9 +64,9 @@ model Category {
   description String?
   imageUrl    String?
   imageHint   String?
-  products    Product[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  products    Product[]
 }
 
 model Product {
@@ -83,8 +75,8 @@ model Product {
   slug            String      @unique
   description     String?
   longDescription String?
-  price           Decimal     @db.Decimal(10, 2)
-  originalPrice   Decimal?    @db.Decimal(10, 2)
+  price           Decimal
+  originalPrice   Decimal?
   imageUrl        String?
   imageHint       String?
   categoryId      String?
@@ -97,19 +89,11 @@ model Product {
   orderItems      OrderItem[]
 }
 
-enum OrderStatus {
-  Pending
-  Processing
-  Completed
-  Failed
-  Delivered
-}
-
 model Order {
   id            String      @id @default(cuid())
   userId        String?
-  total         Decimal     @db.Decimal(10, 2)
-  status        OrderStatus @default(Pending)
+  total         Decimal
+  status        String
   transactionId String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
@@ -123,7 +107,7 @@ model OrderItem {
   productId      String
   quantity       Int
   recipientEmail String?
-  price          Decimal  @db.Decimal(10, 2)
+  price          Decimal
   order          Order    @relation(fields: [orderId], references: [id])
   product        Product  @relation(fields: [productId], references: [id])
 }

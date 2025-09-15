@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ProductCard } from '@/components/product-card';
@@ -15,9 +14,10 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetClose
 } from "@/components/ui/sheet";
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, ListFilter } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
@@ -36,30 +36,32 @@ function Filters({ categories, isMobile, closeSheet }: { categories: Category[],
   const pathname = usePathname();
 
   const [priceRange, setPriceRange] = useState<[number]>([Number(searchParams.get('price')) || MAX_PRICE]);
-  const [currentCategory, setCurrentCategory] = useState(searchParams.get('category') || 'all');
-  const [currentSort, setCurrentSort] = useState(searchParams.get('sort') || 'popularity');
+  
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set(name, value)
+      // Reset page to 1 on filter change
+      if (name !== 'page') {
+        params.set('page', '1');
+      }
+      return params.toString()
+    },
+    [searchParams]
+  )
 
   const handleFilterChange = (type: 'category' | 'sort' | 'price', value: string | number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set(type, String(value));
-    if (type !== 'page') {
-      params.set('page', '1');
-    }
-    router.push(`${pathname}?${params.toString()}`);
+    router.push(`${pathname}?${createQueryString(type, String(value))}`);
     if (isMobile && closeSheet) {
       closeSheet();
     }
   };
 
   const handlePriceCommit = (value: number[]) => {
-    setPriceRange([value[0]]);
     handleFilterChange('price', value[0]);
   }
   
   const resetFilters = () => {
-    setPriceRange([MAX_PRICE]);
-    setCurrentCategory('all');
-    setCurrentSort('popularity');
     router.push(pathname);
     if (isMobile && closeSheet) {
         closeSheet();
@@ -74,7 +76,10 @@ function Filters({ categories, isMobile, closeSheet }: { categories: Category[],
       </div>
       <div>
         <Label className="text-base">Category</Label>
-        <Select value={currentCategory} onValueChange={(value) => { setCurrentCategory(value); handleFilterChange('category', value)}}>
+        <Select 
+          value={searchParams.get('category') || 'all'} 
+          onValueChange={(value) => handleFilterChange('category', value)}
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Filter by category" />
           </SelectTrigger>
@@ -94,14 +99,17 @@ function Filters({ categories, isMobile, closeSheet }: { categories: Category[],
           max={MAX_PRICE}
           step={100}
           value={priceRange}
-          onValueChange={setPriceRange}
+          onValueChange={(value) => setPriceRange([value[0]])}
           onValueCommit={handlePriceCommit}
           className="mt-2"
         />
       </div>
        <div>
         <Label className="text-base">Sort By</Label>
-        <Select value={currentSort} onValueChange={(value) => { setCurrentSort(value); handleFilterChange('sort', value)}}>
+        <Select 
+          value={searchParams.get('sort') || 'popularity'} 
+          onValueChange={(value) => handleFilterChange('sort', value)}
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
@@ -168,12 +176,17 @@ export default function ProductsPage() {
     const fetchProductsAndCategories = async () => {
       setIsLoading(true);
       const params = new URLSearchParams(searchParams.toString());
-      const res = await fetch(`/api/products?${params.toString()}`);
-      const data = await res.json();
-      setProducts(data.products);
-      setCategories(data.categories);
-      setTotalProducts(data.totalProducts);
-      setIsLoading(false);
+      try {
+        const res = await fetch(`/api/products?${params.toString()}`);
+        const data = await res.json();
+        setProducts(data.products);
+        setCategories(data.categories);
+        setTotalProducts(data.totalProducts);
+      } catch (error) {
+        console.error("Failed to fetch product data", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchProductsAndCategories();
   }, [searchParams]);
@@ -198,6 +211,7 @@ export default function ProductsPage() {
       <SheetContent side="left">
         <SheetHeader>
           <SheetTitle>Filter Products</SheetTitle>
+           <SheetClose />
         </SheetHeader>
         <div className="py-4">
           <Filters categories={categories} isMobile={true} closeSheet={() => setSheetOpen(false)} />

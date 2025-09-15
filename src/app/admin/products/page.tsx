@@ -24,9 +24,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
-import { products as allProducts } from "@/lib/data"; // Using mock data for now
+import prisma from "@/lib/db";
 
-export default function AdminProductsPage() {
+export default async function AdminProductsPage() {
+  const allProducts = await prisma.product.findMany({
+    include: {
+      category: true,
+    }
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -67,7 +73,7 @@ export default function AdminProductsPage() {
                     alt={product.name}
                     className="aspect-square rounded-md object-cover"
                     height="64"
-                    src={product.imageUrl}
+                    src={product.imageUrl || 'https://placehold.co/64'}
                     width="64"
                   />
                 </TableCell>
@@ -75,9 +81,9 @@ export default function AdminProductsPage() {
                 <TableCell>
                   <Badge variant="outline">Active</Badge>
                 </TableCell>
-                <TableCell>৳{product.price.toFixed(2)}</TableCell>
+                <TableCell>৳{Number(product.price).toFixed(2)}</TableCell>
                 <TableCell className="hidden md:table-cell">
-                  {product.category}
+                  {product.category?.name}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>

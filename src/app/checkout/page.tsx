@@ -31,6 +31,7 @@ import { useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useToast } from "@/hooks/use-toast";
 
 
 const checkoutSchema = z.object({
@@ -51,6 +52,7 @@ export default function CheckoutPage() {
   const { cart, total, clearCart } = useCart();
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { toast } = useToast();
   const user = session?.user;
 
   const form = useForm<CheckoutFormValues>({
@@ -59,10 +61,21 @@ export default function CheckoutPage() {
       transactionId: "",
       items: cart.map(item => ({
         productId: item.product.id,
-        recipientEmail: item.recipientEmail || "",
+        recipientEmail: item.recipientEmail || user?.email || "",
       })),
     },
   });
+  
+  useEffect(() => {
+    form.reset({
+       transactionId: "",
+       items: cart.map(item => ({
+        productId: item.product.id,
+        recipientEmail: item.recipientEmail || user?.email || "",
+      })),
+    })
+  }, [cart, user, form])
+
 
   const { fields } = useFieldArray({
     control: form.control,
@@ -78,11 +91,35 @@ export default function CheckoutPage() {
     }
   }, [cart.length, router, status]);
 
-  const onSubmit = (data: CheckoutFormValues) => {
-    console.log("Checkout data:", data);
-    // Here you would typically send the data to your backend to verify the transaction
-    clearCart();
-    router.push(`/order-confirmation?total=${total.toFixed(2)}`);
+  const onSubmit = async (data: CheckoutFormValues) => {
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...data,
+          total,
+          cart
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create order");
+      }
+      
+      clearCart();
+      router.push(`/order-confirmation?total=${total.toFixed(2)}`);
+
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Order Failed",
+        description: "There was an issue placing your order. Please try again."
+      })
+    }
+
   };
 
   if (status === 'loading' || (status === 'authenticated' && cart.length === 0) || !user) {
@@ -162,8 +199,8 @@ export default function CheckoutPage() {
                      })}
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full">
-                    Complete Purchase
+                  <Button type="submit" size="lg" className="w-full" disabled={form.formState.isSubmitting}>
+                    {form.formState.isSubmitting ? 'Placing Order...' : 'Complete Purchase'}
                   </Button>
                 </form>
               </Form>

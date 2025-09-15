@@ -8,11 +8,32 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import prisma from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { format } from "date-fns";
+import Link from "next/link";
 
-// TODO: Fetch orders for the logged-in user from the database
-const orders: any[] = [];
+async function getUserOrders() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return [];
+  }
 
-export default function OrdersPage() {
+  const orders = await prisma.order.findMany({
+    where: {
+      userId: session.user.id
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  })
+  return orders;
+}
+
+export default async function OrdersPage() {
+  const orders = await getUserOrders();
+
   return (
     <div>
        <h2 className="text-2xl font-bold mb-6">My Orders</h2>
@@ -31,14 +52,14 @@ export default function OrdersPage() {
               <TableBody>
                 {orders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
-                    <TableCell>{order.date}</TableCell>
+                    <TableCell className="font-medium">{order.id.substring(0, 7)}...</TableCell>
+                    <TableCell>{format(new Date(order.createdAt), 'PPP')}</TableCell>
                     <TableCell>
                       <Badge variant={order.status === 'Completed' ? 'default' : 'secondary'} className={order.status === 'Completed' ? 'bg-green-600' : ''}>
                         {order.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">৳{order.total.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">৳{Number(order.total).toFixed(2)}</TableCell>
                     <TableCell className="text-right">
                         <Button variant="outline" size="sm">View Details</Button>
                     </TableCell>
@@ -51,8 +72,11 @@ export default function OrdersPage() {
         <div className="text-center py-16 border rounded-lg bg-muted/50">
             <h3 className="text-xl font-semibold">No Orders Yet</h3>
             <p className="text-muted-foreground mt-2">
-                You haven't placed any orders.
+                You haven&apos;t placed any orders yet.
             </p>
+             <Button asChild className="mt-4">
+              <Link href="/products">Start Shopping</Link>
+            </Button>
         </div>
        )}
     </div>

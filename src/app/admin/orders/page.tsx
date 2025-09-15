@@ -24,9 +24,19 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, File } from "lucide-react";
-import { orders } from "@/lib/data"; // Using mock data for now
+import prisma from "@/lib/db";
+import { format } from "date-fns";
 
-export default function AdminOrdersPage() {
+export default async function AdminOrdersPage() {
+  const orders = await prisma.order.findMany({
+    include: {
+      user: true
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  })
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center">
@@ -62,13 +72,13 @@ export default function AdminOrdersPage() {
           <TableBody>
             {orders.map((order) => (
               <TableRow key={order.id}>
-                <TableCell className="font-medium">{order.id}</TableCell>
-                <TableCell>John Doe</TableCell> 
-                <TableCell>{order.date}</TableCell>
+                <TableCell className="font-medium">{order.id.substring(0, 7)}...</TableCell>
+                <TableCell>{order.user?.name || 'Guest'}</TableCell> 
+                <TableCell>{format(new Date(order.createdAt), 'PPP')}</TableCell>
                 <TableCell>
                   <Badge variant={order.status === 'Completed' ? 'default' : 'secondary'}>{order.status}</Badge>
                 </TableCell>
-                <TableCell className="text-right">৳{order.total.toFixed(2)}</TableCell>
+                <TableCell className="text-right">৳{Number(order.total).toFixed(2)}</TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

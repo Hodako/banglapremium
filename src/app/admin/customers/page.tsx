@@ -24,10 +24,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
-import { customers } from "@/lib/data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import prisma from "@/lib/db";
+import { format } from "date-fns";
 
-export default function AdminCustomersPage() {
+export default async function AdminCustomersPage() {
+  const customers = await prisma.user.findMany({
+    orderBy: {
+      createdAt: 'desc'
+    }
+  })
+  
   return (
     <Card>
       <CardHeader>
@@ -63,8 +70,8 @@ export default function AdminCustomersPage() {
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-9 w-9">
-                        <AvatarImage src={`https://picsum.photos/seed/${customer.id}/100`} alt={customer.name} />
-                        <AvatarFallback>{customer.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={customer.image || `https://picsum.photos/seed/${customer.id}/100`} alt={customer.name || ''} />
+                        <AvatarFallback>{customer.name ? customer.name.charAt(0) : 'U'}</AvatarFallback>
                     </Avatar>
                     <div className="font-medium">{customer.name}</div>
                   </div>
@@ -74,7 +81,7 @@ export default function AdminCustomersPage() {
                   <Badge variant={customer.role === 'admin' ? 'destructive' : 'secondary'}>{customer.role}</Badge>
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">
-                  {new Date(customer.createdAt).toLocaleDateString()}
+                  {format(new Date(customer.createdAt), 'PPP')}
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>

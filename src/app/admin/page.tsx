@@ -22,20 +22,8 @@ import {
   Activity,
 } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-
-// Mock data, replace with actual data fetching
-const totalRevenue = 125300;
-const totalOrders = 890;
-const totalCustomers = 350;
-const totalProducts = 75;
-
-const recentOrders = [
-  { id: "ORD-101", customer: "John Doe", amount: 1200, status: "Completed" },
-  { id: "ORD-102", customer: "Jane Smith", amount: 2500, status: "Processing" },
-  { id: "ORD-103", customer: "Sam Wilson", amount: 800, status: "Completed" },
-  { id: "ORD-104", customer: "Alice Brown", amount: 1800, status: "Pending" },
-  { id: "ORD-105", customer: "Bob Johnson", amount: 750, status: "Delivered" },
-];
+import prisma from "@/lib/db";
+import { format } from "date-fns";
 
 const salesData = [
     { name: 'Jan', revenue: 4000 },
@@ -46,7 +34,44 @@ const salesData = [
     { name: 'Jun', revenue: 5500 },
 ];
 
-export default function AdminDashboardPage() {
+
+async function getDashboardData() {
+  const totalRevenue = await prisma.order.aggregate({
+    _sum: {
+      total: true,
+    },
+    where: {
+      status: 'Completed'
+    }
+  });
+
+  const totalOrders = await prisma.order.count();
+  const totalCustomers = await prisma.user.count({ where: { role: 'customer' } });
+  const totalProducts = await prisma.product.count();
+
+  const recentOrders = await prisma.order.findMany({
+    take: 5,
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      user: true,
+    }
+  })
+
+  return {
+    totalRevenue: totalRevenue._sum.total ?? 0,
+    totalOrders,
+    totalCustomers,
+    totalProducts,
+    recentOrders,
+  }
+}
+
+
+export default async function AdminDashboardPage() {
+  const { totalRevenue, totalOrders, totalCustomers, totalProducts, recentOrders } = await getDashboardData();
+  
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -57,7 +82,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ৳{totalRevenue.toLocaleString()}
+              ৳{Number(totalRevenue).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">+20.1% from last month</p>
           </CardContent>
@@ -133,9 +158,9 @@ export default function AdminDashboardPage() {
               <TableBody>
                 {recentOrders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
-                    <TableCell>{order.customer}</TableCell>
-                    <TableCell className="text-right">৳{order.amount.toFixed(2)}</TableCell>
+                    <TableCell className="font-medium">{order.id.substring(0, 7)}</TableCell>
+                    <TableCell>{order.user?.name}</TableCell>
+                    <TableCell className="text-right">৳{Number(order.total).toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{order.status}</Badge>
                     </TableCell>

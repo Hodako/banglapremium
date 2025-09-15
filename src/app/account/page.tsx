@@ -1,32 +1,15 @@
-'use client';
 
-import { useSession } from "next-auth/react";
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ProfileForm } from './_components/ProfileForm';
 
-export default function AccountPage() {
-  const { data: session, status } = useSession();
+export default async function AccountPage() {
+  const session = await getServerSession(authOptions);
 
-  if (status === "loading") {
-    return (
-      <div>
-        <h2 className="text-2xl font-bold mb-6">Profile Information</h2>
-        <div className="flex items-center gap-6 mb-8">
-          <Skeleton className="h-20 w-20 rounded-full" />
-          <div>
-            <Skeleton className="h-6 w-32 mb-2" />
-            <Skeleton className="h-4 w-48" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return null;
+  if (!session || !session.user) {
+    redirect('/login?callbackUrl=/account');
   }
 
   const user = session.user;
@@ -49,29 +32,11 @@ export default function AccountPage() {
         </div>
       </div>
       
-      <form className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" defaultValue={firstName} />
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" defaultValue={lastName} />
-            </div>
-        </div>
-         <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <Input id="email" type="email" defaultValue={user?.email || ''} readOnly />
-        </div>
-        <div className="space-y-2">
-            <Label htmlFor="password">New Password</Label>
-            <Input id="password" type="password" placeholder="Enter new password" />
-        </div>
-        <div className="flex justify-end">
-            <Button>Save Changes</Button>
-        </div>
-      </form>
+      <ProfileForm 
+        firstName={firstName}
+        lastName={lastName}
+        email={user.email || ''}
+      />
     </div>
   );
 }

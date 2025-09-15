@@ -5,9 +5,13 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/db";
 import bcrypt from 'bcrypt';
 import type { NextAuthOptions, User } from "next-auth";
+import { PrismaClient } from "@prisma/client/edge";
+import { withAccelerate } from '@prisma/extension-accelerate';
+
+const prismaWithAccelerate = new PrismaClient().$extends(withAccelerate())
 
 export const authOptions: NextAuthOptions = {
-    adapter: PrismaAdapter(prisma),
+    adapter: PrismaAdapter(prismaWithAccelerate as any),
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID!,

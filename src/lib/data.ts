@@ -1,2 +1,214 @@
 
-    
+export const categories = [
+  {
+    name: 'Entertainment',
+    slug: 'entertainment',
+    description: 'Streaming, movies, and more.',
+    imageUrl: 'https://picsum.photos/seed/cat1/600/400',
+    imageHint: 'cinema screen',
+  },
+  {
+    name: 'Social Media',
+    slug: 'social-media',
+    description: 'Connect with friends and family.',
+    imageUrl: 'https://picsum.photos/seed/cat2/600/400',
+    imageHint: 'social network',
+  },
+  {
+    name: 'Professional',
+    slug: 'professional',
+    description: 'Boost your career and productivity.',
+    imageUrl: 'https://picsum.photos/seed/cat3/600/400',
+    imageHint: 'office meeting',
+  },
+  {
+    name: 'Music',
+    slug: 'music',
+    description: 'Listen to your favorite artists.',
+    imageUrl: 'https://picsum.photos/seed/cat4/600/400',
+    imageHint: 'headphones concert',
+  },
+  {
+    name: 'Gaming',
+    slug: 'gaming',
+    description: 'Play the latest and greatest games.',
+    imageUrl: 'https://picsum.photos/seed/cat5/600/400',
+    imageHint: 'gaming controller',
+  },
+];
+
+export const products = [
+  // Best Sellers
+  {
+    name: 'YouTube Premium',
+    slug: 'youtube-premium',
+    category: 'Entertainment',
+    description: 'Ad-free YouTube, offline playback, and background play.',
+    longDescription: 'Enjoy YouTube and YouTube Music ad-free, offline, and in the background. A seamless viewing and listening experience awaits.',
+    price: 11.99,
+    originalPrice: null,
+    imageUrl: 'https://picsum.photos/seed/prod1/600/400',
+    imageHint: 'video play button',
+    isBestSelling: true,
+    isFeatured: true,
+    releaseDate: '2023-01-15'
+  },
+  {
+    name: 'Netflix Premium',
+    slug: 'netflix-premium',
+    category: 'Entertainment',
+    description: 'Ultra HD streaming on four devices simultaneously.',
+    longDescription: 'Get the best of Netflix with 4K Ultra HD streaming, available on four screens at once. Perfect for families and movie lovers.',
+    price: 19.99,
+    originalPrice: null,
+    imageUrl: 'https://picsum.photos/seed/prod5/600/400',
+    imageHint: 'movie reel',
+    isBestSelling: true,
+    isFeatured: false,
+     releaseDate: '2023-03-20'
+  },
+   {
+    name: 'Spotify Premium',
+    slug: 'spotify-premium',
+    category: 'Music',
+    description: 'Listen without limits. Ad-free music, offline listening.',
+    longDescription: 'Spotify Premium offers ad-free music, offline listening, and unlimited skips. Discover new artists and create playlists for any mood.',
+    price: 9.99,
+    originalPrice: 12.99,
+    imageUrl: 'https://picsum.photos/seed/prod4/600/400',
+    imageHint: 'music notes',
+    isBestSelling: true,
+    isFeatured: true,
+     releaseDate: '2023-02-10'
+  },
+  {
+    name: 'LinkedIn Premium',
+    slug: 'linkedin-premium',
+    category: 'Professional',
+    description: 'Unlock networking features and career insights.',
+    longDescription: 'Take your career to the next level with LinkedIn Premium. See who viewed your profile, get InMail credits, and access exclusive salary data.',
+    price: 29.99,
+    originalPrice: null,
+    imageUrl: 'https://picsum.photos/seed/prod3/600/400',
+    imageHint: 'business handshake',
+    isBestSelling: true,
+    isFeatured: false,
+     releaseDate: '2023-04-01'
+  },
+  {
+    name: 'Discord Nitro',
+    slug: 'discord-nitro',
+    category: 'Gaming',
+    description: 'Supercharge your Discord experience.',
+    longDescription: 'Upgrade your Discord with custom emojis, a personal profile, bigger uploads, and HD streaming. The ultimate upgrade for any Discord user.',
+    price: 9.99,
+    originalPrice: null,
+    imageUrl: 'https://picsum.photos/seed/prod7/600/400',
+    imageHint: 'gaming mascot',
+    isBestSelling: true,
+    isFeatured: false,
+     releaseDate: '2023-05-05'
+  },
+  
+  // Featured
+  {
+    name: 'Disney+ Premium',
+    slug: 'disney-plus-premium',
+    category: 'Entertainment',
+    description: 'The home of Disney, Pixar, Marvel, Star Wars, and National Geographic.',
+    longDescription: 'Endless entertainment from the best creators in the world. Ad-free streaming, unlimited downloads, and exclusive originals.',
+    price: 7.99,
+    originalPrice: null,
+    imageUrl: 'https://picsum.photos/seed/prod8/600/400',
+    imageHint: 'magic castle',
+    isBestSelling: false,
+    isFeatured: true,
+     releaseDate: '2023-06-10'
+  },
+   {
+    name: 'Adobe Creative Cloud',
+    slug: 'adobe-creative-cloud',
+    category: 'Professional',
+    description: 'The ultimate toolkit for creativity.',
+    longDescription: 'Get access to Photoshop, Illustrator, Premiere Pro, and more. All the creative tools you need to bring your ideas to life.',
+    price: 52.99,
+    originalPrice: null,
+    imageUrl: 'https://picsum.photos/seed/prod9/600/400',
+    imageHint: 'design tools',
+    isBestSelling: false,
+    isFeatured: true,
+     releaseDate: '2023-07-15'
+  },
+  {
+    name: 'X Premium',
+    slug: 'x-premium',
+    category: 'Social Media',
+    description: 'Get the blue checkmark and access to new features.',
+    longDescription: 'Enhance your experience on X with a blue checkmark, longer posts, and early access to new features. Formerly Twitter Blue.',
+    price: 8.00,
+    originalPrice: null,
+    imageUrl: 'https://picsum.photos/seed/prod6/600/400',
+    imageHint: 'abstract bird',
+    isBestSelling: false,
+    isFeatured: true,
+     releaseDate: '2023-08-01'
+  },
+  {
+    name: 'Amazon Prime Video',
+    slug: 'amazon-prime-video',
+    category: 'Entertainment',
+    description: 'Watch thousands of movies and TV shows.',
+    longDescription: 'From award-winning Amazon Originals to the latest movies, Prime Video offers a vast library of content for every taste.',
+    price: 8.99,
+    originalPrice: 10.99,
+    imageUrl: 'https://picsum.photos/seed/prod10/600/400',
+    imageHint: 'film projector',
+    isBestSelling: false,
+    isFeatured: true,
+     releaseDate: '2023-09-12'
+  },
+
+  // Others
+  {
+    name: 'Facebook Premium',
+    slug: 'facebook-premium',
+    category: 'Social Media',
+    description: 'An ad-free experience on Facebook.',
+    longDescription: 'Browse your feed, connect with friends, and watch videos without a single ad. A cleaner, faster Facebook experience.',
+    price: 12.99,
+    originalPrice: null,
+    imageUrl: 'https://picsum.photos/seed/prod2/600/400',
+    imageHint: 'social connection',
+    isBestSelling: false,
+    isFeatured: false,
+     releaseDate: '2023-10-01'
+  },
+  {
+    name: 'Xbox Game Pass Ultimate',
+    slug: 'xbox-game-pass-ultimate',
+    category: 'Gaming',
+    description: 'Hundreds of high-quality games on console, PC, and cloud.',
+    longDescription: 'Get an EA Play membership and access to hundreds of games, including day one releases. The best value in gaming.',
+    price: 14.99,
+    originalPrice: null,
+    imageUrl: 'https://picsum.photos/seed/prod11/600/400',
+    imageHint: 'game controller',
+    isBestSelling: false,
+    isFeatured: false,
+     releaseDate: '2023-11-05'
+  },
+  {
+    name: 'Tidal HiFi Plus',
+    slug: 'tidal-hifi-plus',
+    category: 'Music',
+    description: 'Lossless High Fidelity sound quality and immersive audio.',
+    longDescription: 'Experience music the way the artist intended with master quality audio, Dolby Atmos, and Sony 360 Reality Audio.',
+    price: 19.99,
+    originalPrice: null,
+    imageUrl: 'https://picsum.photos/seed/prod12/600/400',
+    imageHint: 'sound waves',
+    isBestSelling: false,
+    isFeatured: false,
+     releaseDate: '2023-12-15'
+  }
+];

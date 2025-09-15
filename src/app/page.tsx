@@ -1,3 +1,4 @@
+'use client';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -14,33 +15,46 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import prisma from '@/lib/db';
+import { useEffect, useState } from 'react';
+import { Product, Category } from '@prisma/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
-async function getHomePageData() {
-  const featuredProducts = await prisma.product.findMany({
-    where: { isFeatured: true },
-    take: 10,
-  });
+export default function Home() {
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [bestSellingProducts, setBestSellingProducts] = useState<Product[]>([]);
+  const [topCategories, setTopCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const bestSellingProducts = await prisma.product.findMany({
-    where: { isBestSelling: true },
-    take: 5,
-  });
+  useEffect(() => {
+    async function getHomePageData() {
+      setIsLoading(true);
+      try {
+        const [featured, bestSellers, categories] = await Promise.all([
+          fetch('/api/products?sort=popularity&limit=10').then(res => res.json()),
+          fetch('/api/products?sort=popularity&limit=5').then(res => res.json()),
+          fetch('/api/products?limit=4').then(res => res.json())
+        ]);
+        setFeaturedProducts(featured.products.filter((p: Product) => p.isFeatured));
+        setBestSellingProducts(bestSellers.products.filter((p: Product) => p.isBestSelling));
+        
+        // This is a bit of a hack since we don't have a dedicated categories API yet that returns counts
+        const categoryMap = new Map<string, Category>();
+        categories.products.forEach((p: Product & { category: Category}) => {
+          if (p.category && !categoryMap.has(p.category.id)) {
+            categoryMap.set(p.category.id, p.category);
+          }
+        });
+        setTopCategories(Array.from(categoryMap.values()).slice(0, 4));
 
-  const topCategories = await prisma.category.findMany({
-    take: 4,
-    include: {
-      _count: {
-        select: { products: true }
+      } catch (error) {
+        console.error("Failed to fetch homepage data", error);
+      } finally {
+        setIsLoading(false);
       }
     }
-  });
+    getHomePageData();
+  }, [])
 
-  return { featuredProducts, bestSellingProducts, topCategories };
-}
-
-
-export default async function Home() {
-  const { featuredProducts, bestSellingProducts, topCategories } = await getHomePageData();
 
   return (
     <div>
@@ -110,24 +124,30 @@ export default async function Home() {
               <Link href="/products">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
-          <Carousel
-            opts={{
-              align: "start",
-            }}
-            className="w-full"
-          >
-            <CarouselContent>
-              {featuredProducts.map((product) => (
-                <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
-                  <div className="p-1">
-                    <ProductCard product={product} />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden sm:flex" />
-            <CarouselNext className="hidden sm:flex" />
-          </Carousel>
+          {isLoading ? (
+            <div className="flex space-x-4">
+              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-64 w-1/5" />)}
+            </div>
+          ) : (
+            <Carousel
+              opts={{
+                align: "start",
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {featuredProducts.map((product) => (
+                  <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                    <div className="p-1">
+                      <ProductCard product={product} />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden sm:flex" />
+              <CarouselNext className="hidden sm:flex" />
+            </Carousel>
+          )}
         </div>
       </section>
 
@@ -142,11 +162,17 @@ export default async function Home() {
               <Link href="/best-sellers">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {bestSellingProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {isLoading ? (
+             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              {bestSellingProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -196,33 +222,37 @@ export default async function Home() {
               <Link href="/categories">View All <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
-           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {topCategories.map((category) => (
-              <Link key={category.id} href={`/categories/${category.slug}`} className="group block">
-                <Card className="h-full overflow-hidden transition-all group-hover:shadow-lg group-hover:-translate-y-1">
-                  <div className="relative h-40 w-full">
-                    <Image
-                      src={category.imageUrl!}
-                      alt={category.name}
-                      fill
-                      className="object-cover"
-                      data-ai-hint={category.imageHint!}
-                    />
-                  </div>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      {category.name}
-                      <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
-                    </CardTitle>
-                  </CardHeader>
-                </Card>
-              </Link>
-            ))}
-          </div>
+          {isLoading ? (
+             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {topCategories.map((category) => (
+                <Link key={category.id} href={`/categories/${category.slug}`} className="group block">
+                  <Card className="h-full overflow-hidden transition-all group-hover:shadow-lg group-hover:-translate-y-1">
+                    <div className="relative h-40 w-full">
+                      <Image
+                        src={category.imageUrl!}
+                        alt={category.name}
+                        fill
+                        className="object-cover"
+                        data-ai-hint={category.imageHint!}
+                      />
+                    </div>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        {category.name}
+                        <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+                      </CardTitle>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>
   );
 }
-
-    

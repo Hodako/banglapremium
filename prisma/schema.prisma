@@ -1,14 +1,34 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  directUrl    = env("DIRECT_URL")
+}
+
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["dataProxy"]
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+enum UserRole {
+  customer
+  admin
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          UserRole  @default(customer)
+  accounts      Account[]
+  orders        Order[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Account {
@@ -17,12 +37,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -38,32 +58,12 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          UserRole  @default(customer)
-  accounts      Account[]
-  sessions      Session[]
-  orders        Order[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
 model VerificationToken {
   identifier String
-  token      String   @unique
+  token      String
   expires    DateTime
 
   @@unique([identifier, token])
-}
-
-enum UserRole {
-  customer
-  admin
 }
 
 model Category {
@@ -79,23 +79,23 @@ model Category {
 }
 
 model Product {
-  id              String    @id @default(cuid())
-  name            String
-  slug            String    @unique
-  description     String?
-  longDescription String?
-  price           Decimal
-  originalPrice   Decimal?
-  imageUrl        String?
-  imageHint       String?
-  categoryId      String?
-  category        Category? @relation(fields: [categoryId], references: [id])
-  isFeatured      Boolean   @default(false)
-  isBestSelling   Boolean   @default(false)
-  releaseDate     DateTime?
-  orderItems      OrderItem[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id               String      @id @default(cuid())
+  name             String
+  slug             String      @unique
+  description      String?
+  longDescription  String?
+  price            Decimal     @db.Decimal(10, 2)
+  originalPrice    Decimal?    @db.Decimal(10, 2)
+  imageUrl         String?
+  imageHint        String?
+  category         Category?   @relation(fields: [categoryId], references: [id])
+  categoryId       String?
+  isFeatured       Boolean     @default(false)
+  isBestSelling    Boolean     @default(false)
+  releaseDate      DateTime?
+  orderItems       OrderItem[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 }
 
 enum OrderStatus {
@@ -108,10 +108,10 @@ enum OrderStatus {
 
 model Order {
   id            String      @id @default(cuid())
-  userId        String?
   user          User?       @relation(fields: [userId], references: [id])
-  total         Decimal
-  status        OrderStatus @default(Pending)
+  userId        String?
+  total         Decimal     @db.Decimal(10, 2)
+  status        OrderStatus @default(Processing)
   transactionId String?
   items         OrderItem[]
   createdAt     DateTime    @default(now())
@@ -120,11 +120,11 @@ model Order {
 
 model OrderItem {
   id             String   @id @default(cuid())
-  orderId        String
   order          Order    @relation(fields: [orderId], references: [id])
-  productId      String
+  orderId        String
   product        Product  @relation(fields: [productId], references: [id])
+  productId      String
   quantity       Int
+  price          Decimal  @db.Decimal(10, 2)
   recipientEmail String?
-  price          Decimal
 }

@@ -64,6 +64,9 @@ export async function GET(request: NextRequest) {
             orderBy: orderBy,
             skip: (page - 1) * limit,
             take: limit,
+            include: {
+              category: true,
+            }
         }),
         prisma.product.count({ where: whereClause }),
         prisma.category.findMany(),
@@ -79,5 +82,3 @@ export async function GET(request: NextRequest) {
      return NextResponse.json({ message: "Failed to fetch products", error }, { status: 500 });
   }
 }
-
-    

@@ -47,34 +47,21 @@ export default function LoginPage() {
 
     try {
       const result = await signIn('credentials', {
-        redirect: false,
         email,
         password,
+        redirect: true,
         callbackUrl,
       });
 
+      // The signIn function with redirect: true will handle the navigation.
+      // If it returns, it's usually because of an error that will be handled by the error search param.
 
       if (result?.error) {
+        // This part will likely not be reached with redirect: true,
+        // but it's good for catching non-redirect errors.
         throw new Error(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error);
       }
       
-      if(result?.ok) {
-        toast({
-            title: "Logged In",
-            description: "Welcome back!",
-        });
-        
-        const res = await fetch('/api/auth/session');
-        const session = await res.json();
-        
-        // @ts-ignore
-        if (session?.user?.role === 'admin' && (callbackUrl === '/account' || callbackUrl === '/login')) {
-            router.push('/admin');
-        } else {
-            router.push(callbackUrl);
-        }
-      }
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
@@ -83,7 +70,9 @@ export default function LoginPage() {
         description: errorMessage,
       });
     } finally {
-      setIsLoading(false);
+      // It's better not to set loading to false here with redirect: true
+      // as the page will be navigating away. If the navigation fails,
+      // the page will reload with an error param.
     }
   };
 
@@ -103,7 +92,7 @@ export default function LoginPage() {
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
-             {error && (
+             {error === "CredentialsSignin" && (
                 <Alert variant="destructive">
                     <Terminal className="h-4 w-4" />
                     <AlertTitle>Login Failed</AlertTitle>

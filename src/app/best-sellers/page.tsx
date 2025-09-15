@@ -1,15 +1,18 @@
-import { products } from '@/lib/data';
+
 import { ProductCard } from '@/components/product-card';
 import type { Metadata } from 'next';
 import { Star } from 'lucide-react';
+import prisma from '@/lib/db';
 
 export const metadata: Metadata = {
   title: 'Best Sellers | Bangla Premium',
   description: 'Our most popular digital products and subscriptions.',
 };
 
-export default function BestSellersPage() {
-  const bestSellingProducts = products.filter((p) => p.isBestSelling);
+export default async function BestSellersPage() {
+  const bestSellingProducts = await prisma.product.findMany({
+    where: { isBestSelling: true },
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">

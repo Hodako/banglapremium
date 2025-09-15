@@ -1,10 +1,7 @@
 
-'use client'
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { products, categories } from '@/lib/data';
 import { ProductCard } from '@/components/product-card';
 import { ArrowRight, Star, Tag, Gift, LayoutGrid } from 'lucide-react';
 import {
@@ -16,11 +13,34 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import prisma from '@/lib/db';
 
-export default function Home() {
-  const featuredProducts = products.filter(p => p.isFeatured);
-  const bestSellingProducts = products.filter(p => p.isBestSelling);
-  const topCategories = categories.slice(0, 4);
+async function getHomePageData() {
+  const featuredProducts = await prisma.product.findMany({
+    where: { isFeatured: true },
+    take: 10,
+  });
+
+  const bestSellingProducts = await prisma.product.findMany({
+    where: { isBestSelling: true },
+    take: 5,
+  });
+
+  const topCategories = await prisma.category.findMany({
+    take: 4,
+    include: {
+      _count: {
+        select: { products: true }
+      }
+    }
+  });
+
+  return { featuredProducts, bestSellingProducts, topCategories };
+}
+
+
+export default async function Home() {
+  const { featuredProducts, bestSellingProducts, topCategories } = await getHomePageData();
 
   return (
     <div>
@@ -140,7 +160,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Card className="overflow-hidden group relative">
-                <Link href="#">
+                <Link href="/products?category=gaming">
                     <Image src="https://picsum.photos/seed/offer1/800/400" alt="Special Offer 1" width={800} height={400} className="object-cover w-full h-auto transition-transform group-hover:scale-105" data-ai-hint="electronics sale" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-0 left-0 p-6">
@@ -151,7 +171,7 @@ export default function Home() {
                 </Link>
             </Card>
             <Card className="overflow-hidden group relative">
-                 <Link href="#">
+                 <Link href="/products?category=entertainment">
                     <Image src="https://picsum.photos/seed/offer2/800/400" alt="Special Offer 2" width={800} height={400} className="object-cover w-full h-auto transition-transform group-hover:scale-105" data-ai-hint="streaming service" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                      <div className="absolute bottom-0 left-0 p-6">
@@ -182,11 +202,11 @@ export default function Home() {
                 <Card className="h-full overflow-hidden transition-all group-hover:shadow-lg group-hover:-translate-y-1">
                   <div className="relative h-40 w-full">
                     <Image
-                      src={category.imageUrl}
+                      src={category.imageUrl!}
                       alt={category.name}
                       fill
                       className="object-cover"
-                      data-ai-hint={category.imageHint}
+                      data-ai-hint={category.imageHint!}
                     />
                   </div>
                   <CardHeader>
@@ -204,3 +224,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

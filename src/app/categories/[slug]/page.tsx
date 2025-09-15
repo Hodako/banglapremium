@@ -1,14 +1,17 @@
-import { products, categories } from '@/lib/data';
+
 import { notFound } from 'next/navigation';
 import { ProductCard } from '@/components/product-card';
 import type { Metadata } from 'next';
+import prisma from '@/lib/db';
 
 type Props = {
   params: { slug: string };
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const category = categories.find((c) => c.slug === params.slug);
+  const category = await prisma.category.findUnique({
+    where: { slug: params.slug },
+  });
 
   if (!category) {
     return {
@@ -22,13 +25,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const category = categories.find((c) => c.slug === params.slug);
+export default async function CategoryPage({ params }: { params: { slug: string } }) {
+  const category = await prisma.category.findUnique({
+    where: { slug: params.slug },
+  });
+
   if (!category) {
     notFound();
   }
 
-  const categoryProducts = products.filter((p) => p.category === category.name);
+  const categoryProducts = await prisma.product.findMany({
+    where: { categoryId: category.id },
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -54,6 +62,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 }
 
 export async function generateStaticParams() {
+  const categories = await prisma.category.findMany();
   return categories.map((category) => ({
     slug: category.slug,
   }));

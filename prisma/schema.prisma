@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
 }
 
 datasource db {
@@ -16,17 +17,20 @@ enum UserRole {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String          @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?         @unique
   emailVerified DateTime?
   image         String?
   password      String?
-  role          UserRole  @default(customer)
+  role          UserRole        @default(customer)
   accounts      Account[]
   orders        Order[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  
+  // Explicitly define the relation to Session
+  sessions      Session[]
 }
 
 model Account {
@@ -46,6 +50,14 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -69,23 +81,23 @@ model Category {
 }
 
 model Product {
-  id              String      @id @default(cuid())
-  name            String
-  slug            String      @unique
-  description     String?
-  longDescription String?
-  price           Decimal     @db.Decimal(10, 2)
-  originalPrice   Decimal?    @db.Decimal(10, 2)
-  imageUrl        String?
-  imageHint       String?
-  categoryId      String?
-  category        Category?   @relation(fields: [categoryId], references: [id])
-  isFeatured      Boolean     @default(false)
-  isBestSelling   Boolean     @default(false)
-  releaseDate     DateTime?
-  orderItems      OrderItem[]
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id               String      @id @default(cuid())
+  name             String
+  slug             String      @unique
+  description      String?
+  longDescription  String?
+  price            Decimal     @db.Decimal(10, 2)
+  originalPrice    Decimal?    @db.Decimal(10, 2)
+  imageUrl         String?
+  imageHint        String?
+  category         Category?   @relation(fields: [categoryId], references: [id])
+  categoryId       String?
+  isFeatured       Boolean     @default(false)
+  isBestSelling    Boolean     @default(false)
+  releaseDate      DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  OrderItem        OrderItem[]
 }
 
 enum OrderStatus {
@@ -98,8 +110,8 @@ enum OrderStatus {
 
 model Order {
   id            String      @id @default(cuid())
-  userId        String?
   user          User?       @relation(fields: [userId], references: [id])
+  userId        String?
   total         Decimal     @db.Decimal(10, 2)
   status        OrderStatus @default(Pending)
   transactionId String?
@@ -110,12 +122,11 @@ model Order {
 
 model OrderItem {
   id             String   @id @default(cuid())
-  orderId        String
   order          Order    @relation(fields: [orderId], references: [id])
-  productId      String
+  orderId        String
   product        Product  @relation(fields: [productId], references: [id])
+  productId      String
   quantity       Int
   recipientEmail String?
   price          Decimal  @db.Decimal(10, 2)
-  createdAt      DateTime @default(now())
 }

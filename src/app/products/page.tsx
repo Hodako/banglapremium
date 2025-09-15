@@ -1,7 +1,6 @@
 
 'use client';
 
-import { products, categories } from '@/lib/data';
 import { ProductCard } from '@/components/product-card';
 import {
   Select,
@@ -18,18 +17,20 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, ListFilter } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { useIsMobile } from '@/hooks/use-mobile';
-
+import { Product, Category } from '@prisma/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const PRODUCTS_PER_PAGE = 8;
 const MAX_PRICE = 5000;
 
-function Filters({ isMobile, closeSheet }: { isMobile: boolean, closeSheet?: () => void }) {
+
+function Filters({ categories, isMobile, closeSheet }: { categories: Category[], isMobile: boolean, closeSheet?: () => void }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -116,6 +117,39 @@ function Filters({ isMobile, closeSheet }: { isMobile: boolean, closeSheet?: () 
   )
 }
 
+function ProductGrid({ products, isLoading }: { products: Product[], isLoading: boolean }) {
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: PRODUCTS_PER_PAGE }).map((_, i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton className="aspect-video w-full" />
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (products.length === 0) {
+    return (
+      <div className="text-center py-16 col-span-full">
+        <h2 className="text-xl font-semibold">No products found</h2>
+        <p className="mt-2 text-muted-foreground">Try adjusting your filters.</p>
+      </div>
+    );
+  }
+  return (
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
+  );
+}
+
+
 export default function ProductsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -123,48 +157,28 @@ export default function ProductsPage() {
   const isMobile = useIsMobile();
   const [sheetOpen, setSheetOpen] = useState(false);
   
-  const category = searchParams.get('category') || 'all';
-  const sort = searchParams.get('sort') || 'popularity';
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
   const page = Number(searchParams.get('page')) || 1;
-  const maxPrice = Number(searchParams.get('price')) || MAX_PRICE;
 
+  useEffect(() => {
+    const fetchProductsAndCategories = async () => {
+      setIsLoading(true);
+      const params = new URLSearchParams(searchParams.toString());
+      const res = await fetch(`/api/products?${params.toString()}`);
+      const data = await res.json();
+      setProducts(data.products);
+      setCategories(data.categories);
+      setTotalProducts(data.totalProducts);
+      setIsLoading(false);
+    };
+    fetchProductsAndCategories();
+  }, [searchParams]);
 
-  const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products;
-
-    if (category !== 'all') {
-      const selectedCategory = categories.find(c => c.slug === category);
-      if (selectedCategory) {
-        filtered = filtered.filter(p => p.category === selectedCategory.name);
-      }
-    }
-    
-    filtered = filtered.filter(p => p.price <= maxPrice);
-
-    switch (sort) {
-      case 'price-asc':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-desc':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'newest':
-        filtered.sort((a, b) => (new Date(b.releaseDate || 0).getTime()) - (new Date(a.releaseDate || 0).getTime()));
-        break;
-      case 'popularity':
-      default:
-        filtered.sort((a, b) => (b.isBestSelling ? 1 : 0) - (a.isBestSelling ? 1 : 0) || (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
-        break;
-    }
-
-    return filtered;
-  }, [category, sort, maxPrice]);
-
-  const totalPages = Math.ceil(filteredAndSortedProducts.length / PRODUCTS_PER_PAGE);
-  const paginatedProducts = filteredAndSortedProducts.slice(
-    (page - 1) * PRODUCTS_PER_PAGE,
-    page * PRODUCTS_PER_PAGE
-  );
+  const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -186,13 +200,13 @@ export default function ProductsPage() {
           <SheetTitle>Filter Products</SheetTitle>
         </SheetHeader>
         <div className="py-4">
-          <Filters isMobile={true} closeSheet={() => setSheetOpen(false)} />
+          <Filters categories={categories} isMobile={true} closeSheet={() => setSheetOpen(false)} />
         </div>
       </SheetContent>
     </Sheet>
   ) : (
       <aside className="md:col-span-1 p-4 border rounded-lg bg-card sticky top-24 h-fit">
-        <Filters isMobile={false}/>
+        <Filters categories={categories} isMobile={false}/>
       </aside>
   );
 
@@ -209,43 +223,30 @@ export default function ProductsPage() {
         {!isMobile && FilterComponent}
 
         <main className="md:col-span-3">
-           {paginatedProducts.length > 0 ? (
-            <>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {paginatedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-              {totalPages > 1 && (
-                <div className="mt-8 flex justify-center items-center gap-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => handlePageChange(page - 1)}
-                    disabled={page <= 1}
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Previous
-                  </Button>
-                  <span className="text-sm">
-                    Page {page} of {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    onClick={() => handlePageChange(page + 1)}
-                    disabled={page >= totalPages}
-                  >
-                    Next
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </div>
-              )}
-            </>
-           ) : (
-             <div className="text-center py-16 col-span-3">
-                <h2 className="text-xl font-semibold">No products found</h2>
-                <p className="mt-2 text-muted-foreground">Try adjusting your filters.</p>
-              </div>
-           )}
+          <ProductGrid products={products} isLoading={isLoading} />
+           {totalPages > 1 && !isLoading && (
+            <div className="mt-8 flex justify-center items-center gap-4">
+              <Button
+                variant="outline"
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page <= 1}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+              <span className="text-sm">
+                Page {page} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page >= totalPages}
+              >
+                Next
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+          )}
         </main>
       </div>
     </div>

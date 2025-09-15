@@ -1,16 +1,19 @@
-import { categories } from '@/lib/data';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
+import prisma from '@/lib/db';
 
 export const metadata: Metadata = {
   title: 'Categories | Bangla Premium',
   description: 'Explore products by category.',
 };
 
-export default function CategoriesPage() {
+export default async function CategoriesPage() {
+  const categories = await prisma.category.findMany();
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 text-center">
@@ -24,11 +27,11 @@ export default function CategoriesPage() {
             <Card className="h-full overflow-hidden transition-all group-hover:shadow-lg group-hover:-translate-y-1">
               <div className="relative h-40 w-full">
                 <Image
-                  src={category.imageUrl}
+                  src={category.imageUrl!}
                   alt={category.name}
                   fill
                   className="object-cover"
-                  data-ai-hint={category.imageHint}
+                  data-ai-hint={category.imageHint!}
                 />
               </div>
               <CardHeader>

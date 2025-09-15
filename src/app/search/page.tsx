@@ -1,15 +1,37 @@
+
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { products } from '@/lib/data';
 import { ProductCard } from '@/components/product-card';
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Product } from '@prisma/client';
 
 function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (query) {
+      setIsLoading(true);
+      fetch(`/api/products?q=${query}`)
+        .then(res => res.json())
+        .then(data => {
+          setProducts(data.products);
+          setIsLoading(false);
+        })
+        .catch(() => setIsLoading(false));
+    } else {
+      setIsLoading(false);
+    }
+  }, [query]);
   
+  if (isLoading) {
+    return <SearchLoading />;
+  }
+
   if (!query) {
     return (
       <div className="text-center py-16">
@@ -19,24 +41,18 @@ function SearchResults() {
     );
   }
 
-  const filteredProducts = products.filter(product => 
-    product.name.toLowerCase().includes(query.toLowerCase()) ||
-    product.description.toLowerCase().includes(query.toLowerCase()) ||
-    product.category.toLowerCase().includes(query.toLowerCase())
-  );
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="font-headline text-3xl font-extrabold tracking-tight mb-2">
         Search Results for &quot;{query}&quot;
       </h1>
       <p className="text-muted-foreground mb-8">
-        {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} found.
+        {products.length} {products.length === 1 ? 'product' : 'products'} found.
       </p>
 
-      {filteredProducts.length > 0 ? (
+      {products.length > 0 ? (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {filteredProducts.map((product) => (
+          {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
@@ -78,3 +94,5 @@ export default function SearchPage() {
         </Suspense>
     )
 }
+
+    

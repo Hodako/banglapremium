@@ -17,9 +17,9 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart();
 
-  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const hasDiscount = product.originalPrice && Number(product.originalPrice) > Number(product.price);
   const discountPercentage = hasDiscount 
-    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
+    ? Math.round(((Number(product.originalPrice!) - Number(product.price)) / Number(product.originalPrice!)) * 100)
     : 0;
 
   return (
@@ -27,12 +27,12 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link href={`/products/${product.slug}`} className="block p-0">
           <div className="relative aspect-[4/3] w-full">
             <Image
-              src={product.imageUrl}
+              src={product.imageUrl!}
               alt={product.name}
               fill
               className="object-cover transition-transform group-hover:scale-105"
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-              data-ai-hint={product.imageHint}
+              data-ai-hint={product.imageHint!}
             />
              {product.isBestSelling && (
               <Badge variant="secondary" className="absolute top-2 left-2 bg-amber-400 text-amber-900 font-bold gap-1 pl-1.5">
@@ -47,14 +47,14 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
       </Link>
       <CardContent className="flex flex-1 flex-col p-3">
-        <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
+        {/* <p className="text-xs text-muted-foreground mb-1">{product.category.name}</p> */}
         <Link href={`/products/${product.slug}`} className="flex-grow">
           <h3 className="text-sm font-medium leading-tight mb-2 group-hover:text-primary">{product.name}</h3>
         </Link>
          <div className="flex items-center justify-between mt-auto">
             <div className="flex items-baseline gap-1.5">
-                <p className="text-sm sm:text-base font-bold text-primary">৳{product.price.toFixed(2)}</p>
-                {product.originalPrice && <p className="text-xs sm:text-sm text-muted-foreground line-through">৳{product.originalPrice.toFixed(2)}</p>}
+                <p className="text-sm sm:text-base font-bold text-primary">৳{Number(product.price).toFixed(2)}</p>
+                {product.originalPrice && <p className="text-xs sm:text-sm text-muted-foreground line-through">৳{Number(product.originalPrice).toFixed(2)}</p>}
             </div>
         </div>
       </CardContent>
@@ -67,4 +67,3 @@ export function ProductCard({ product }: ProductCardProps) {
     </Card>
   );
 }
-

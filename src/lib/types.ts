@@ -1,27 +1,8 @@
-export interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  longDescription: string;
-  price: number;
-  originalPrice?: number;
-  imageUrl: string;
-  imageHint: string;
-  category: string;
-  isFeatured: boolean;
-  isBestSelling: boolean;
-  releaseDate?: string;
-}
 
-export interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  imageUrl: string;
-  imageHint: string;
-}
+import type { Product as PrismaProduct, Category as PrismaCategory, Order as PrismaOrder, OrderItem as PrismaOrderItem, User as PrismaUser } from '@prisma/client';
+
+export type Product = PrismaProduct;
+export type Category = PrismaCategory;
 
 export interface CartItem {
   product: Product;
@@ -29,19 +10,9 @@ export interface CartItem {
   recipientEmail?: string;
 }
 
-export interface Order {
-  id: string;
-  items: CartItem[];
-  total: number;
-  transactionId: string;
-  date: string;
-  status: 'Pending' | 'Completed' | 'Failed' | 'Processing' | 'Delivered';
+export type Order = PrismaOrder & {
+    items: (PrismaOrderItem & { product: Product })[];
+    user: PrismaUser | null;
 }
 
-export interface User {
-    id: string;
-    name: string;
-    email: string;
-    role: 'customer' | 'admin';
-    createdAt: string;
-}
+export type User = PrismaUser;

@@ -17,9 +17,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { products } from "@/lib/data";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import type { Product } from "@prisma/client";
 
 export function Header() {
   const { cart } = useCart();
@@ -30,7 +30,7 @@ export function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<typeof products>([]);
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
   const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   
@@ -46,13 +46,19 @@ export function Header() {
     }
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
     if (query.trim().length > 1) {
-      const filtered = products.filter(p => p.name.toLowerCase().includes(query.toLowerCase())).slice(0, 5);
-      setSuggestions(filtered);
-      setIsSuggestionsVisible(true);
+      try {
+        const res = await fetch(`/api/products?q=${query}&limit=5`);
+        const data = await res.json();
+        setSuggestions(data.products);
+        setIsSuggestionsVisible(true);
+      } catch (error) {
+        console.error("Failed to fetch search suggestions", error);
+        setSuggestions([]);
+      }
     } else {
       setSuggestions([]);
       setIsSuggestionsVisible(false);
@@ -186,10 +192,10 @@ export function Header() {
                           className="flex items-center gap-4 px-4 py-2 hover:bg-muted"
                           onClick={() => setIsSuggestionsVisible(false)}
                         >
-                          <Image src={product.imageUrl} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
+                          <Image src={product.imageUrl!} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
                           <div>
                             <p className="font-medium text-sm">{product.name}</p>
-                            <p className="text-xs text-muted-foreground">৳{product.price.toFixed(2)}</p>
+                            <p className="text-xs text-muted-foreground">৳{Number(product.price).toFixed(2)}</p>
                           </div>
                         </Link>
                       </li>

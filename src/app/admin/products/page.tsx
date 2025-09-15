@@ -19,17 +19,38 @@ import {
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuTrigger,
+    DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from 'next/link';
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import prisma from "@/lib/db";
+import { deleteProduct } from "../_actions/products";
+import { notFound } from "next/navigation";
+
+
+function DeleteDropDownItem({ id }: { id: string }) {
+  return (
+    <form action={async () => {
+      'use server'
+      await deleteProduct(id)
+    }}>
+      <button type="submit" className="w-full text-left relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 text-destructive">
+        Delete
+      </button>
+    </form>
+  )
+}
 
 export default async function AdminProductsPage() {
   const allProducts = await prisma.product.findMany({
     include: {
       category: true,
+    },
+    orderBy: {
+        createdAt: 'desc'
     }
   });
 
@@ -41,11 +62,13 @@ export default async function AdminProductsPage() {
             <CardTitle>Products</CardTitle>
             <CardDescription>Manage your products here.</CardDescription>
           </div>
-          <Button size="sm" className="gap-1">
-             <PlusCircle className="h-3.5 w-3.5" />
-             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Add Product
-             </span>
+          <Button size="sm" className="gap-1" asChild>
+            <Link href="/admin/products/new">
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Add Product
+                </span>
+            </Link>
           </Button>
         </div>
       </CardHeader>
@@ -95,8 +118,11 @@ export default async function AdminProductsPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/admin/products/${product.id}/edit`}>Edit</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DeleteDropDownItem id={product.id} />
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState } from "react";
@@ -37,6 +38,7 @@ export default function SignupPage() {
     setIsLoading(true);
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
+    const { email, password } = data;
 
     try {
         const response = await fetch('/api/auth/register', {
@@ -52,9 +54,29 @@ export default function SignupPage() {
 
         toast({
             title: "Account Created",
-            description: "Welcome! Please log in to continue.",
+            description: "Welcome! Logging you in...",
         });
-        router.push("/login");
+        
+        // Automatically sign in the user after successful registration
+        const signInResult = await signIn('credentials', {
+            email,
+            password,
+            redirect: false,
+        });
+
+        if (signInResult?.error) {
+            // This case is unlikely but good to handle. Redirect to login as a fallback.
+             toast({
+                variant: "destructive",
+                title: "Login Failed",
+                description: "Your account was created, but we couldn't log you in. Please log in manually.",
+            });
+            router.push('/login');
+            return;
+        }
+
+        router.push("/account");
+        router.refresh();
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
@@ -132,7 +154,7 @@ export default function SignupPage() {
                 <Separator className="absolute left-0 top-1/2 -translate-y-1/2 w-full" />
                 <span className="relative z-10 bg-card px-2 text-xs uppercase text-muted-foreground">Or continue with</span>
             </div>
-            <Button variant="outline" className="w-full" type="button" onClick={() => signIn('google')} disabled={isLoading}>
+            <Button variant="outline" className="w-full" type="button" onClick={() => signIn('google', { callbackUrl: '/account' })} disabled={isLoading}>
                 <GoogleIcon />
                 Sign up with Google
             </Button>

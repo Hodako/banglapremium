@@ -1,3 +1,6 @@
+
+'use client';
+
 import {
   Home,
   Package,
@@ -19,6 +22,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const menuItems = [
   { href: "/admin", label: "Dashboard", icon: Home },
@@ -33,22 +38,38 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { data: session, status } = useSession();
+  const user = session?.user;
+  const isLoading = status === "loading";
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen bg-muted/40">
         <Sidebar className="border-r">
           <SidebarHeader>
             <div className="flex items-center gap-2 p-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="https://picsum.photos/seed/admin/100" />
-                <AvatarFallback>AD</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span className="font-semibold text-sm">Admin User</span>
-                <span className="text-xs text-muted-foreground">
-                  admin@example.com
-                </span>
-              </div>
+              {isLoading ? (
+                <>
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <div className="flex flex-col gap-1">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user?.image || "https://picsum.photos/seed/admin/100"} />
+                    <AvatarFallback>{user?.name?.charAt(0) ?? 'A'}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm">{user?.name ?? 'Admin User'}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {user?.email ?? 'admin@example.com'}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </SidebarHeader>
           <SidebarContent className="p-2">

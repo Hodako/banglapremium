@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState } from "react";
@@ -49,18 +50,16 @@ export default function LoginPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false, // Set to false to handle redirection manually
-        callbackUrl,
+        redirect: false,
       });
-
+      
       if (result?.error) {
         throw new Error(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error);
       }
       
-      // On successful sign-in, NextAuth doesn't throw an error and `result.ok` is true.
-      // We can now redirect the user.
+      // On successful sign-in, redirect the user.
       router.push(callbackUrl);
-      router.refresh(); // Refresh the page to update session state in the header
+      router.refresh();
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';

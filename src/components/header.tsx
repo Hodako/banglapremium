@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import Link from "next/link";
@@ -88,6 +89,8 @@ export function Header() {
     { href: "/categories", label: "Categories" },
     { href: "/best-sellers", label: "Best Sellers" },
   ];
+  
+  const accountHref = isLoggedIn ? "/account" : "/login";
 
   return (
     <>
@@ -215,7 +218,7 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
-              <Link href="/account" className="flex">
+              <Link href={accountHref} className="flex">
                 <Button variant="ghost" size="icon" className="h-9 w-9">
                   <User className="h-5 w-5" />
                   <span className="sr-only">Account</span>

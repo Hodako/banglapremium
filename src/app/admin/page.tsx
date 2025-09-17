@@ -1,4 +1,3 @@
-'use client';
 
 import {
   Card,
@@ -23,8 +22,9 @@ import {
   Activity,
 } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { useEffect, useState } from "react";
+import prisma from "@/lib/db";
 import { Order, User } from "@prisma/client";
+import { format } from "date-fns";
 
 const salesData = [
     { name: 'Jan', revenue: 4000 },
@@ -37,32 +37,46 @@ const salesData = [
 
 type RecentOrder = Order & { user: User | null };
 
-export default function AdminDashboardPage() {
-  const [totalRevenue, setTotalRevenue] = useState(0);
-  const [totalOrders, setTotalOrders] = useState(0);
-  const [totalCustomers, setTotalCustomers] = useState(0);
-  const [totalProducts, setTotalProducts] = useState(0);
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+async function getDashboardData() {
+    const [totalRevenue, totalOrders, totalCustomers, totalProducts, recentOrders] = await Promise.all([
+        prisma.order.aggregate({
+            _sum: {
+                total: true
+            },
+            where: {
+                status: 'Completed'
+            }
+        }),
+        prisma.order.count(),
+        prisma.user.count({
+            where: {
+                role: 'customer'
+            }
+        }),
+        prisma.product.count(),
+        prisma.order.findMany({
+            take: 5,
+            orderBy: {
+                createdAt: 'desc'
+            },
+            include: {
+                user: true
+            }
+        })
+    ]);
 
-  useEffect(() => {
-    async function getDashboardData() {
-      // In a real app, these would be API calls to fetch data.
-      // We are leaving them as static for now as per the current setup.
-      setTotalRevenue(54231);
-      setTotalOrders(125);
-      setTotalCustomers(89);
-      setTotalProducts(25);
-      
-      // Mocking recent orders as well since we can't do DB calls in a client component directly
-      // without an API route. In a real scenario, this would be a fetch.
-      const mockOrders: RecentOrder[] = [
-        { id: '1', userId: '1', total: 29.99, status: 'Completed', transactionId: 'abc', createdAt: new Date(), updatedAt: new Date(), user: { id: '1', name: 'John Doe', email: 'john@a.com', emailVerified: null, image:null, password: '', role: 'customer', createdAt: new Date(), updatedAt: new Date() } },
-        { id: '2', userId: '2', total: 9.99, status: 'Processing', transactionId: 'def', createdAt: new Date(), updatedAt: new Date(), user: { id: '2', name: 'Jane Smith', email: 'jane@a.com', emailVerified: null, image:null, password: '', role: 'customer', createdAt: new Date(), updatedAt: new Date() } },
-      ];
-      setRecentOrders(mockOrders);
-    }
-    getDashboardData();
-  }, []);
+    return {
+        totalRevenue: totalRevenue._sum.total || 0,
+        totalOrders,
+        totalCustomers,
+        totalProducts,
+        recentOrders
+    };
+}
+
+
+export default async function AdminDashboardPage() {
+    const { totalRevenue, totalOrders, totalCustomers, totalProducts, recentOrders } = await getDashboardData();
 
   return (
     <div className="space-y-6">
@@ -101,7 +115,7 @@ export default function AdminDashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Products in Stock</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -118,6 +132,7 @@ export default function AdminDashboardPage() {
             <CardDescription>A summary of sales over the last 6 months.</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
+            {/* Note: This chart still uses static data. It should be converted to a client component to be interactive. */}
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={salesData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -141,20 +156,27 @@ export default function AdminDashboardPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Order ID</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
-                  <TableHead>Status</TableHead>
+                   <TableHead className="hidden sm:table-cell">Date</TableHead>
+                  <TableHead className="text-right">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {recentOrders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id.substring(0, 7)}</TableCell>
-                    <TableCell>{order.user?.name}</TableCell>
-                    <TableCell className="text-right">৳{Number(order.total).toFixed(2)}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{order.status}</Badge>
+                      <div className="font-medium">{order.user?.name || 'Guest'}</div>
+                      <div className="hidden text-sm text-muted-foreground md:inline">
+                        {order.user?.email}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">৳{Number(order.total).toFixed(2)}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{format(new Date(order.createdAt), "dd/MM/yyyy")}</TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={order.status === 'Completed' ? 'default' : 'secondary'} className={order.status === 'Completed' ? 'bg-green-600' : ''}>
+                        {order.status}
+                      </Badge>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -166,3 +188,5 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+    

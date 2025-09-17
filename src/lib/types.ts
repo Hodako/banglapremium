@@ -10,8 +10,12 @@ export interface CartItem {
 }
 
 export type Order = PrismaOrder & {
-    items: (PrismaOrderItem & { product: Product })[];
+    items: OrderItem[];
     user: PrismaUser | null;
 }
 
+export type OrderItem = PrismaOrderItem & { product: Product };
+
 export type User = PrismaUser;
+
+    

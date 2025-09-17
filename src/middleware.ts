@@ -1,34 +1,35 @@
-import { NextResponse } from 'next/server'
-import { getToken } from 'next-auth/jwt'
-import type { NextRequest } from 'next/server'
+import NextAuth from 'next-auth';
+import { authOptions } from './lib/auth';
 
-export async function middleware(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
-  const { pathname } = req.nextUrl
+const { auth } = NextAuth(authOptions);
 
-  // Protect the /admin routes
+export default auth((req) => {
+  const { pathname } = req.nextUrl;
+  const isLoggedIn = !!req.auth;
+
+  // Protect admin routes
   if (pathname.startsWith('/admin')) {
-    // @ts-ignore
-    if (!token || token.role !== 'admin') {
-      const url = new URL('/login', req.url)
-      url.searchParams.set('callbackUrl', pathname)
-      return NextResponse.redirect(url)
+    if (!isLoggedIn) {
+      return Response.redirect(new URL('/login?callbackUrl=' + pathname, req.url));
     }
+    if (req.auth?.user?.role !== 'admin') {
+      return Response.redirect(new URL('/unauthorized', req.url)); // Or show a 'not authorized' page
+    }
+    return;
   }
-  
-  // Protect account pages
+
+  // Protect account and checkout routes
   if (pathname.startsWith('/account') || pathname.startsWith('/checkout')) {
-    if (!token) {
-        const url = new URL('/login', req.url)
-        url.searchParams.set('callbackUrl', pathname)
-        return NextResponse.redirect(url)
+    if (!isLoggedIn) {
+      return Response.redirect(new URL('/login?callbackUrl=' + pathname, req.url));
     }
+    return;
   }
-
-
-  return NextResponse.next()
-}
+});
 
 export const config = {
-  matcher: ['/admin/:path*', '/account/:path*', '/checkout'],
-}
+  // We are using the middleware for all routes to handle auth state,
+  // but we are only protecting specific routes in the logic above.
+  // The matcher is simplified to avoid complex regex and let the logic handle it.
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+};

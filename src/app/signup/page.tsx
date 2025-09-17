@@ -61,7 +61,8 @@ export default function SignupPage() {
         const signInResult = await signIn('credentials', {
             email,
             password,
-            redirect: false,
+            redirect: true, // Let NextAuth handle the redirect
+            callbackUrl: '/account',
         });
 
         if (signInResult?.error) {
@@ -72,11 +73,7 @@ export default function SignupPage() {
                 description: "Your account was created, but we couldn't log you in. Please log in manually.",
             });
             router.push('/login');
-            return;
         }
-
-        router.refresh();
-        router.push("/account");
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';

@@ -30,7 +30,6 @@ function GoogleIcon() {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
@@ -50,19 +49,19 @@ export default function LoginPage() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false,
+        callbackUrl,
       });
-      
+
+      // This part will only be reached if signIn fails and doesn't redirect
       if (result?.error) {
-        throw new Error(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error);
+        throw new Error(result.error);
       }
-      
-      // On successful sign-in, redirect the user.
-      router.push(callbackUrl);
-      router.refresh();
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      const errorMessage = error instanceof Error && error.message === 'CredentialsSignin' 
+        ? 'Invalid email or password.'
+        : 'An unexpected error occurred.';
+        
       toast({
         variant: "destructive",
         title: "Login Failed",

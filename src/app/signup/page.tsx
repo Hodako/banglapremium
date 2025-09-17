@@ -75,8 +75,8 @@ export default function SignupPage() {
             return;
         }
 
-        router.push("/account");
         router.refresh();
+        router.push("/account");
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';

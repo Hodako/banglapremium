@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
@@ -28,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn('min-h-screen bg-background font-body antialiased', noto.variable)}>
+      <body className={cn('min-h-screen bg-background font-body antialiased', noto.variable)} suppressHydrationWarning>
         <SessionProvider>
           <CartProvider>
             <div className="relative flex min-h-dvh flex-col">

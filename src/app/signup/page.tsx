@@ -61,18 +61,18 @@ export default function SignupPage() {
         const signInResult = await signIn('credentials', {
             email,
             password,
-            redirect: true, // Let NextAuth handle the redirect
-            callbackUrl: '/account',
+            redirect: false,
         });
 
         if (signInResult?.error) {
-            // This case is unlikely but good to handle. Redirect to login as a fallback.
-             toast({
+            toast({
                 variant: "destructive",
                 title: "Login Failed",
                 description: "Your account was created, but we couldn't log you in. Please log in manually.",
             });
             router.push('/login');
+        } else if (signInResult?.ok) {
+             router.push('/');
         }
 
     } catch (error) {
@@ -151,7 +151,7 @@ export default function SignupPage() {
                 <Separator className="absolute left-0 top-1/2 -translate-y-1/2 w-full" />
                 <span className="relative z-10 bg-card px-2 text-xs uppercase text-muted-foreground">Or continue with</span>
             </div>
-            <Button variant="outline" className="w-full" type="button" onClick={() => signIn('google', { callbackUrl: '/account' })} disabled={isLoading}>
+            <Button variant="outline" className="w-full" type="button" onClick={() => signIn('google', { callbackUrl: '/' })} disabled={isLoading}>
                 <GoogleIcon />
                 Sign up with Google
             </Button>

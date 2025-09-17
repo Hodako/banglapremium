@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -28,6 +29,7 @@ interface ProfileFormProps {
 
 export function ProfileForm({ firstName, lastName, email }: ProfileFormProps) {
   const { toast } = useToast();
+  const { update } = useSession();
   const [state, formAction] = useFormState(updateUserProfile, null);
 
   useEffect(() => {
@@ -36,8 +38,10 @@ export function ProfileForm({ firstName, lastName, email }: ProfileFormProps) {
         title: 'Success!',
         description: state.success,
       });
+      // Trigger a session update on the client
+      update();
     }
-  }, [state, toast]);
+  }, [state, toast, update]);
 
   return (
     <form action={formAction} className="space-y-6">

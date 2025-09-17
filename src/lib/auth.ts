@@ -1,3 +1,4 @@
+
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
@@ -55,7 +56,10 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === "update" && session?.name) {
+        token.name = session.name
+      }
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
@@ -65,14 +69,14 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        (session.user as any).role = token.role;
+        session.user.role = token.role as 'admin' | 'customer';
+        session.user.name = token.name;
       }
       return session;
     },
   },
   pages: {
     signIn: '/login',
-    error: '/login', // Redirect all auth errors to the login page
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

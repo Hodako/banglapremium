@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Terminal } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { signIn } from "next-auth/react";
@@ -37,7 +36,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const callbackUrl = searchParams.get('callbackUrl') || '/account';
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
 
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -48,8 +47,7 @@ export default function LoginPage() {
     const result = await signIn('credentials', {
       email,
       password,
-      redirect: false, // Do not redirect automatically
-      callbackUrl,
+      redirect: false,
     });
     
     setIsLoading(false);
@@ -60,10 +58,8 @@ export default function LoginPage() {
        } else {
          setError('An unexpected error occurred. Please try again.');
        }
-    } else if (result?.url) {
-      // On success, NextAuth returns a URL to redirect to.
-      // We manually handle the redirect.
-      router.push(result.url);
+    } else if (result?.ok) {
+      router.push(callbackUrl);
     }
   };
 

@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState } from "react";
@@ -17,11 +16,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Terminal } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { signIn } from "next-auth/react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal } from "lucide-react";
 
 function GoogleIcon() {
   return (
@@ -30,50 +28,49 @@ function GoogleIcon() {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [error, setError] = useState<string | null>(searchParams.get("error"));
+
   const callbackUrl = searchParams.get('callbackUrl') || '/account';
-  const error = searchParams.get('error');
 
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
-    try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        callbackUrl,
-      });
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false, // Do not redirect automatically
+      callbackUrl,
+    });
+    
+    setIsLoading(false);
 
-      // This part will only be reached if signIn fails and doesn't redirect
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-
-    } catch (error) {
-      const errorMessage = error instanceof Error && error.message === 'CredentialsSignin' 
-        ? 'Invalid email or password.'
-        : 'An unexpected error occurred.';
-        
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: errorMessage,
-      });
-    } finally {
-      setIsLoading(false);
+    if (result?.error) {
+       if (result.error === 'CredentialsSignin') {
+         setError('Invalid email or password. Please try again.');
+       } else {
+         setError('An unexpected error occurred. Please try again.');
+       }
+    } else if (result?.url) {
+      // On success, NextAuth returns a URL to redirect to.
+      // We manually handle the redirect.
+      router.push(result.url);
     }
   };
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
+    setError(null);
     await signIn('google', { callbackUrl });
   }
 
@@ -88,12 +85,12 @@ export default function LoginPage() {
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
-             {error === "CredentialsSignin" && (
+             {error && (
                 <Alert variant="destructive">
                     <Terminal className="h-4 w-4" />
                     <AlertTitle>Login Failed</AlertTitle>
                     <AlertDescription>
-                        Invalid email or password. Please try again.
+                        {error}
                     </AlertDescription>
                 </Alert>
              )}

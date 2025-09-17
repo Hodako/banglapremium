@@ -72,7 +72,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/login',
-    error: '/login',
+    error: '/login', // Redirect all auth errors to the login page
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

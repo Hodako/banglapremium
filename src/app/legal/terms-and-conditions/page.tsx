@@ -1,12 +1,24 @@
+
+'use client';
+
+import { useEffect, useState } from 'react';
 import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-export const metadata: Metadata = {
-  title: 'Terms and Conditions | Bangla Premium',
-  description: 'Read the terms and conditions for using the Bangla Premium website and services.',
-};
+// Note: Metadata is not used in a client component, but we keep it for reference
+// export const metadata: Metadata = {
+//   title: 'Terms and Conditions | Bangla Premium',
+//   description: 'Read the terms and conditions for using the Bangla Premium website and services.',
+// };
 
 export default function TermsAndConditionsPage() {
+  const [lastUpdated, setLastUpdated] = useState('');
+
+  useEffect(() => {
+    // This code runs only on the client, after hydration
+    setLastUpdated(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+  }, []);
+
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
       <Card>
@@ -14,7 +26,7 @@ export default function TermsAndConditionsPage() {
           <CardTitle className="text-center font-headline text-4xl font-extrabold tracking-tight">Terms and Conditions</CardTitle>
         </CardHeader>
         <CardContent className="prose prose-sm max-w-none text-muted-foreground dark:prose-invert">
-          <p>Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          {lastUpdated && <p>Last updated: {lastUpdated}</p>}
           
           <p>Please read these terms and conditions carefully before using Our Service.</p>
 

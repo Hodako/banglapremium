@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useFormState, useFormStatus } from 'react-dom';
@@ -50,13 +51,13 @@ export function ProfileForm({ firstName, lastName, email }: ProfileFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" name="firstName" defaultValue={firstName} />
-                {state?.error?.firstName && <p className="text-destructive text-sm">{state.error.firstName}</p>}
+                <Input id="firstName" name="firstName" defaultValue={firstName} required />
+                {state?.error?.firstName && <p className="text-destructive text-sm">{state.error.firstName[0]}</p>}
             </div>
             <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" name="lastName" defaultValue={lastName} />
-                 {state?.error?.lastName && <p className="text-destructive text-sm">{state.error.lastName}</p>}
+                <Input id="lastName" name="lastName" defaultValue={lastName} required />
+                 {state?.error?.lastName && <p className="text-destructive text-sm">{state.error.lastName[0]}</p>}
             </div>
         </div>
          <div className="space-y-2">

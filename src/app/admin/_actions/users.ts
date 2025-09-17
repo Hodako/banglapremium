@@ -1,3 +1,4 @@
+
 'use server';
 
 import prisma from '@/lib/db';
@@ -7,24 +8,36 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from '@/lib/auth';
 
 const updateUserSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
+  firstName: z.string().min(1, 'First name is required').trim(),
+  lastName: z.string().min(1, 'Last name is required').trim(),
 });
 
-export async function updateUserProfile(formData: FormData) {
+type FormState = {
+  error?: {
+    form?: string;
+    firstName?: string[];
+    lastName?: string[];
+  };
+  success?: string;
+} | null;
+
+export async function updateUserProfile(prevState: FormState, formData: FormData): Promise<FormState> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return { error: { form: 'You must be logged in to update your profile.' }};
   }
   
-  const result = updateUserSchema.safeParse(Object.fromEntries(formData.entries()));
+  const result = updateUserSchema.safeParse({
+    firstName: formData.get('firstName'),
+    lastName: formData.get('lastName'),
+  });
 
   if (!result.success) {
-    return { error: result.error.formErrors.fieldErrors };
+    return { error: result.error.flatten().fieldErrors };
   }
 
-  const data = result.data;
-  const newName = `${data.firstName} ${data.lastName}`;
+  const { firstName, lastName } = result.data;
+  const newName = `${firstName} ${lastName}`;
   
   try {
     await prisma.user.update({

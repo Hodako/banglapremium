@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -33,6 +34,10 @@ export default function Home() {
           fetch('/api/products?sort=popularity&limit=5&best_selling=true'),
           fetch('/api/products/categories'),
         ]);
+
+        if (!featuredRes.ok || !bestSellersRes.ok || !categoriesRes.ok) {
+          throw new Error('Failed to fetch homepage data');
+        }
         
         const featuredData = await featuredRes.json();
         const bestSellersData = await bestSellersRes.json();
@@ -40,7 +45,7 @@ export default function Home() {
 
         setFeaturedProducts(featuredData.products);
         setBestSellingProducts(bestSellersData.products);
-        setTopCategories(categoriesData.categories.slice(0, 4));
+        setTopCategories(categoriesData.slice(0, 4));
 
       } catch (error) {
         console.error('Failed to fetch homepage data', error);
@@ -308,3 +313,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

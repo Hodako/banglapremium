@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -294,7 +295,7 @@ export default function Home() {
                         alt={category.name}
                         fill
                         className="object-cover"
-                        data-ai-hint={category.imageHint!}
+                        data-ai-hint={category.imageHint}
                       />
                     </div>
                     <CardHeader>

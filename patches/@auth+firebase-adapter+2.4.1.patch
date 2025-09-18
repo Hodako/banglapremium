@@ -1,0 +1,56 @@
+diff --git a/node_modules/@auth/firebase-adapter/index.js b/node_modules/@auth/firebase-adapter/index.js
+index 9ab650a..041d8e1 100644
+--- a/node_modules/@auth/firebase-adapter/index.js
++++ b/node_modules/@auth/firebase-adapter/index.js
+@@ -1,5 +1,5 @@
+ import {
+-  getFirestore, collection, doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, where, query, limit,
++  getFirestore, collection, doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, where, query, limit, Timestamp
+ } from 'firebase/firestore/lite'
+ 
+ /**
+@@ -118,7 +118,7 @@
+     async getSessionAndUser(sessionToken) {
+       const session = query(sessions, where('sessionToken', '==', sessionToken), limit(1))
+       const sessionSnapshot = await getDocs(session)
+-      const sessionDoc = sessionSnapshot.docs[0]
++      const sessionDoc = sessionSnapshot.docs[0]?sessionSnapshot.docs[0]:null
+       if (!sessionDoc?.exists()) {
+         return null
+       }
+@@ -131,7 +131,7 @@
+         return null
+       }
+       const userDoc = await getDoc(user)
+-      if (!userDoc.exists()) {
++      if (!userDoc?.exists()) {
+         return null
+       }
+       return {
+@@ -165,7 +165,7 @@
+       const sessionDoc = sessionSnapshot.docs[0]
+ 
+       await updateDoc(sessionDoc.ref, {
+-        expires: new Date(expires),
++        expires: Timestamp.fromDate(new Date(expires)),
+       })
+ 
+       return {
+@@ -176,7 +176,7 @@
+     },
+     async deleteSession(sessionToken) {
+       const session = query(sessions, where('sessionToken', '==', sessionToken), limit(1))
+-      const sessionDocs = (await getDocs(session)).docs
++      const sessionDocs = (await getDocs(session))?.docs
+       if (sessionDocs[0]) {
+         await deleteDoc(sessionDocs[0].ref)
+       }
+@@ -207,7 +207,7 @@
+     },
+     async getUserByAccount(provider_providerAccountId) {
+       const account = query(accounts, where('provider', '==', provider_providerAccountId.provider), where('providerAccountId', '==', provider_providerAccountId.providerAccountId), limit(1))
+-      const accountSnapshot = await getDocs(account)
++      const accountSnapshot = await getDocs(account)?await getDocs(account):null
+       const accountDoc = accountSnapshot.docs[0]
+       if (!accountDoc?.exists()) {
+         return null

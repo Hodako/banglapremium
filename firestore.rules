@@ -1,0 +1,40 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Allow public read access to products and categories
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Secure users, sessions, and accounts collections
+    match /users/{userId} {
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null;
+      allow delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /accounts/{accountId} {
+       allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).exists;
+       allow list: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).exists;
+       allow create, update, delete: if false; // Managed by next-auth
+    }
+
+    match /sessions/{sessionId} {
+      allow read, write: if false; // Managed by next-auth
+    }
+    
+    // Allow logged-in users to create orders, but only admins to view them
+    match /orders/{orderId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+  }
+}

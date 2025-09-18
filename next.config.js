@@ -15,9 +15,6 @@ const nextConfig = {
       },
     ],
   },
-  env: {
-    NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH: process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH,
-  }
 };
 
 module.exports = nextConfig;

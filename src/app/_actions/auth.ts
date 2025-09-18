@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { firestore } from '@/lib/firebase';
-import { collection, query, where, getDocs, addDoc }slurp
+import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import bcrypt from 'bcryptjs';
 import { AuthError } from 'next-auth';
 

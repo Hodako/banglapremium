@@ -1,8 +1,5 @@
 
-import NextAuth from 'next-auth';
-import authConfig from './lib/auth.config';
-
-const { auth } = NextAuth(authConfig);
+import { auth } from '@/lib/auth';
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
@@ -13,8 +10,9 @@ export default auth((req) => {
     if (!isLoggedIn) {
       return Response.redirect(new URL('/login?callbackUrl=' + pathname, req.url));
     }
-    if (req.auth?.user?.role !== 'admin') {
-      return Response.redirect(new URL('/unauthorized', req.url)); // Or show a 'not authorized' page
+    // The role is checked on the session object which is populated by the jwt callback
+    if (req.auth?.user && (req.auth.user as any).role !== 'admin') {
+      return Response.redirect(new URL('/unauthorized', req.url));
     }
     return;
   }
@@ -29,8 +27,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  // We are using the middleware for all routes to handle auth state,
-  // but we are only protecting specific routes in the logic above.
-  // The matcher is simplified to avoid complex regex and let the logic handle it.
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

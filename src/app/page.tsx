@@ -18,7 +18,6 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 import { Product, Category } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from '@/lib/constants';
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -291,7 +290,7 @@ export default function Home() {
                   <Card className="h-full overflow-hidden transition-all group-hover:-translate-y-1 group-hover:shadow-lg">
                     <div className="relative h-40 w-full">
                       <Image
-                        src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${category.imageUrl}/public`}
+                        src={category.imageUrl!}
                         alt={category.name}
                         fill
                         className="object-cover"

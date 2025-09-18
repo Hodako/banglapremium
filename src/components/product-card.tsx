@@ -8,7 +8,6 @@ import { useCart } from "@/context/cart-context";
 import type { Product } from "@/lib/types";
 import { ShoppingCart, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from "@/lib/constants";
 
 interface ProductCardProps {
   product: Product;
@@ -27,7 +26,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link href={`/products/${product.slug}`} className="block p-0">
           <div className="relative aspect-[4/3] w-full">
             <Image
-              src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${product.imageUrl}/public`}
+              src={product.imageUrl}
               alt={product.name}
               fill
               className="object-cover transition-transform group-hover:scale-105"

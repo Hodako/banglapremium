@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState } from "react"
@@ -11,8 +10,9 @@ import { addCategory, updateCategory } from "@/app/admin/_actions/categories"
 import { Category } from "@/lib/types"
 import { uploadImage } from "@/app/admin/_actions/cloudflare"
 import Image from "next/image"
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from "@/lib/constants"
 import { useFormStatus } from "react-dom"
+
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH}`
 
 function SubmitButton({ isEditMode }: { isEditMode: boolean }) {
     const { pending } = useFormStatus();

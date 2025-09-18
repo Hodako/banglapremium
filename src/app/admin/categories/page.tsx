@@ -28,9 +28,9 @@ import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { firestore } from "@/lib/firebase";
 import { Category } from "@/lib/types";
 import Image from "next/image";
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from "@/lib/constants";
 import { DeleteCategoryButton } from "./_components/DeleteCategoryButton";
 
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.CLOUDFLARE_ACCOUNT_HASH}`
 
 export default async function AdminCategoriesPage() {
   const categoriesQuery = query(collection(firestore, "categories"), orderBy('name', 'asc'));

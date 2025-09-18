@@ -7,7 +7,7 @@ import { Minus, Plus, Trash2, ShoppingCart, ArrowRight, CreditCard } from 'lucid
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from '@/lib/constants';
+import { CLOUDFLARE_IMAGE_DELIVERY_URL } from '@/lib/cloudflare';
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, total } = useCart();

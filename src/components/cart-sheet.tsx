@@ -17,7 +17,6 @@ import { Separator } from "@/components/ui/separator";
 import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from "@/lib/constants";
 import { Input } from "./ui/input";
 
 interface CartSheetProps {
@@ -52,7 +51,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
                   <div key={item.id} className="flex gap-4">
                     <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-md">
                       <Image
-                        src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${item.product.imageUrl}/public`}
+                        src={item.product.imageUrl}
                         alt={item.product.name}
                         fill
                         className="object-cover"

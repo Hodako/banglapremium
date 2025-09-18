@@ -8,7 +8,8 @@ import type { Metadata, ResolvingMetadata } from 'next';
 import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 import { Product } from '@/lib/types';
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from '@/lib/constants';
+
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.CLOUDFLARE_ACCOUNT_HASH}`
 
 type Props = {
   params: { slug: string };
@@ -21,7 +22,11 @@ async function getProductBySlug(slug: string): Promise<Product | null> {
         return null;
     }
     const doc = querySnapshot.docs[0];
-    return { id: doc.id, ...doc.data() } as Product;
+    const data = doc.data()
+    return { 
+        id: doc.id, ...data, 
+        imageUrl: `${CLOUDFLARE_IMAGE_DELIVERY_URL}/${data.imageUrl}/public` 
+    } as Product;
 }
 
 export async function generateMetadata(
@@ -40,7 +45,7 @@ export async function generateMetadata(
     title: `${product.name} | Bangla Premium`,
     description: product.description,
     openGraph: {
-        images: [`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${product.imageUrl}/public`],
+        images: [product.imageUrl],
     },
   };
 }
@@ -58,7 +63,14 @@ export default async function ProductDetailPage({ params }: { params: { slug:str
       where('id', '!=', product.id)
     );
   const relatedProductsSnapshot = await getDocs(relatedProductsQuery);
-  const relatedProducts = relatedProductsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)).slice(0, 4);
+  const relatedProducts = relatedProductsSnapshot.docs.map(doc => {
+      const data = doc.data() as Product
+      return { 
+          id: doc.id, ...data, 
+          imageUrl: `${CLOUDFLARE_IMAGE_DELIVERY_URL}/${data.imageUrl}/public` 
+      } as Product
+    }
+  ).slice(0, 4);
 
 
   return (
@@ -66,7 +78,7 @@ export default async function ProductDetailPage({ params }: { params: { slug:str
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12">
         <div className="relative aspect-video overflow-hidden rounded-lg shadow-lg">
           <Image
-            src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${product.imageUrl}/public`}
+            src={product.imageUrl}
             alt={product.name}
             fill
             className="object-cover"

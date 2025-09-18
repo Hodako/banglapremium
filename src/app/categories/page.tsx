@@ -8,8 +8,8 @@ import type { Metadata } from 'next';
 import { firestore } from '@/lib/firebase';
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { Category } from '@/lib/types';
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from '@/lib/constants';
 
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.CLOUDFLARE_ACCOUNT_HASH}`
 
 export const metadata: Metadata = {
   title: 'Categories | Bangla Premium',
@@ -19,10 +19,14 @@ export const metadata: Metadata = {
 export default async function CategoriesPage() {
   const categoriesQuery = query(collection(firestore, 'categories'), orderBy('name', 'asc'));
   const querySnapshot = await getDocs(categoriesQuery);
-  const categories = querySnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  })) as Category[];
+  const categories = querySnapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+        id: doc.id,
+        ...data,
+        imageUrl: `${CLOUDFLARE_IMAGE_DELIVERY_URL}/${data.imageUrl}/public`
+    }
+  }) as Category[];
 
 
   return (
@@ -38,7 +42,7 @@ export default async function CategoriesPage() {
             <Card className="h-full overflow-hidden transition-all group-hover:shadow-lg group-hover:-translate-y-1">
               <div className="relative h-40 w-full">
                 <Image
-                  src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${category.imageUrl}/public`}
+                  src={category.imageUrl!}
                   alt={category.name}
                   fill
                   className="object-cover"

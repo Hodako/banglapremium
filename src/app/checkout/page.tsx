@@ -33,7 +33,6 @@ import { useSession } from "next-auth/react";
 import { useToast } from "@/hooks/use-toast";
 import { addDoc, collection } from "firebase/firestore";
 import { firestore } from "@/lib/firebase";
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from "@/lib/constants";
 import { AnimatePresence, motion } from "framer-motion";
 
 const checkoutSchema = z.object({
@@ -259,7 +258,7 @@ export default function CheckoutPage() {
                       <div className="flex items-center gap-4">
                         <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-md">
                           <Image
-                            src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${item.product.imageUrl}/public`}
+                            src={item.product.imageUrl}
                             alt={item.product.name}
                             fill
                             className="object-cover"

@@ -12,7 +12,8 @@ import { addProduct, updateProduct } from "@/app/admin/_actions/products"
 import { Product, Category } from "@/lib/types"
 import { uploadImage } from "@/app/admin/_actions/cloudflare"
 import Image from "next/image"
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from "@/lib/constants"
+
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH}`
 
 export function ProductForm({
   product,

@@ -4,7 +4,8 @@ import type { Metadata } from 'next';
 import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 import { Product, Category } from '@/lib/types';
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from '@/lib/constants';
+
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.CLOUDFLARE_ACCOUNT_HASH}`
 
 type Props = {
   params: { slug: string };
@@ -38,7 +39,14 @@ export default async function CategoryPage({ params }: { params: { slug: string 
 
   const productsQuery = query(collection(firestore, 'products'), where('categoryId', '==', category.id));
   const productsSnapshot = await getDocs(productsQuery);
-  const categoryProducts = productsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})) as Product[];
+  const categoryProducts = productsSnapshot.docs.map(doc => {
+      const data = doc.data() as Product
+      return {
+        ...data,
+        id: doc.id,
+        imageUrl: `${CLOUDFLARE_IMAGE_DELIVERY_URL}/${data.imageUrl}/public`
+      }
+  }) as Product[];
 
   return (
     <div className="container mx-auto px-4 py-8">

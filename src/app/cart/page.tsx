@@ -8,7 +8,6 @@ import { Trash2, ShoppingCart, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from '@/lib/constants';
 
 export default function CartPage() {
   const { cart, removeFromCart, total } = useCart();
@@ -38,7 +37,7 @@ export default function CartPage() {
                   <div key={item.id} className="flex flex-col gap-4 p-4 sm:flex-row">
                     <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
                       <Image
-                        src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${item.product.imageUrl}/public`}
+                        src={item.product.imageUrl}
                         alt={item.product.name}
                         fill
                         className="object-cover"

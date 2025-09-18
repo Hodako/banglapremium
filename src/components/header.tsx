@@ -20,7 +20,6 @@ import {
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import type { Product } from "@/lib/types";
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from "@/lib/constants";
 
 export function Header() {
   const { itemCount } = useCart();
@@ -193,7 +192,7 @@ export function Header() {
                           className="flex items-center gap-4 px-4 py-2 hover:bg-muted"
                           onClick={() => setIsSuggestionsVisible(false)}
                         >
-                          <Image src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${product.imageUrl}/thumbnail`} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
+                          <Image src={product.imageUrl} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
                           <div>
                             <p className="font-medium text-sm">{product.name}</p>
                             <p className="text-xs text-muted-foreground">৳{Number(product.price).toFixed(2)}</p>

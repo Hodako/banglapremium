@@ -29,8 +29,8 @@ import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { collection, getDocs } from "firebase/firestore";
 import { firestore } from "@/lib/firebase";
 import { Product } from "@/lib/types";
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from "@/lib/constants";
 
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.CLOUDFLARE_ACCOUNT_HASH}`
 
 export default async function AdminProductsPage() {
   const productsCollection = collection(firestore, "products");

@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -9,6 +8,7 @@ import { useCart } from "@/context/cart-context";
 import type { Product } from "@/lib/types";
 import { ShoppingCart, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { CLOUDFLARE_IMAGE_DELIVERY_URL } from "@/lib/constants";
 
 interface ProductCardProps {
   product: Product;
@@ -27,7 +27,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link href={`/products/${product.slug}`} className="block p-0">
           <div className="relative aspect-[4/3] w-full">
             <Image
-              src={product.imageUrl!}
+              src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${product.imageUrl}/public`}
               alt={product.name}
               fill
               className="object-cover transition-transform group-hover:scale-105"
@@ -47,7 +47,6 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
       </Link>
       <CardContent className="flex flex-1 flex-col p-3">
-        {/* <p className="text-xs text-muted-foreground mb-1">{product.category.name}</p> */}
         <Link href={`/products/${product.slug}`} className="flex-grow">
           <h3 className="text-sm font-medium leading-tight mb-2 group-hover:text-primary">{product.name}</h3>
         </Link>

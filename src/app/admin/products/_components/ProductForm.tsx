@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState } from "react"
@@ -9,13 +8,11 @@ import { useFormState } from "react-dom"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-
-// These types are placeholders until we define the Firestore schema
-type Product = any; 
-type Category = any;
-
-// The actions are disabled as they were tied to Prisma
-const noOpAction = async () => ({ error: { form: "Database not connected. This is a placeholder." }});
+import { addProduct, updateProduct } from "@/app/admin/_actions/products"
+import { Product, Category } from "@/lib/types"
+import { uploadImage } from "@/app/admin/_actions/cloudflare"
+import Image from "next/image"
+import { CLOUDFLARE_IMAGE_DELIVERY_URL } from "@/lib/constants"
 
 export function ProductForm({
   product,
@@ -24,9 +21,29 @@ export function ProductForm({
   product?: Product | null
   categories: Category[]
 }) {
-  const [error, action] = useFormState(noOpAction, {});
+  const [error, action] = useFormState(product ? updateProduct.bind(null, product.id) : addProduct, {});
   const [price, setPrice] = useState<number | undefined>(product?.price ? Number(product.price) : undefined);
   const [originalPrice, setOriginalPrice] = useState<number | undefined>(product?.originalPrice ? Number(product.originalPrice) : undefined);
+  const [imageUrl, setImageUrl] = useState<string | undefined>(product?.imageUrl);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('image', file);
+      const result = await uploadImage(formData);
+      if (result.success && result.imageId) {
+        setImageUrl(result.imageId);
+      } else {
+        // Handle upload error, maybe show a toast
+        console.error(result.error);
+      }
+      setIsUploading(false);
+    }
+  }
+
 
   return (
     <form action={action} className="space-y-8">
@@ -99,14 +116,27 @@ export function ProductForm({
         />
       </div>
        <div className="space-y-2">
-        <Label htmlFor="imageUrl">Image URL</Label>
+        <Label htmlFor="image">Product Image</Label>
         <Input
-          type="text"
-          id="imageUrl"
-          name="imageUrl"
-          required
-          defaultValue={product?.imageUrl || ""}
+          type="file"
+          id="image"
+          name="image"
+          accept="image/*"
+          onChange={handleImageUpload}
+          disabled={isUploading}
         />
+         {isUploading && <p className="text-sm text-muted-foreground">Uploading...</p>}
+         {imageUrl && (
+            <div className="mt-4 relative w-48 h-48">
+              <Image 
+                src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${imageUrl}/public`} 
+                alt="Product image preview" 
+                fill
+                className="rounded-md object-cover"
+              />
+            </div>
+         )}
+        <input type="hidden" name="imageUrl" value={imageUrl} />
          {error?.imageUrl && <div className="text-destructive text-sm">{error.imageUrl}</div>}
       </div>
        <div className="space-y-2">
@@ -129,7 +159,7 @@ export function ProductForm({
         </div>
       </div>
 
-      <Button type="submit" disabled>{product == null ? "Add Product" : "Update Product"}</Button>
+      <Button type="submit">{product == null ? "Add Product" : "Update Product"}</Button>
        {error?.form && <div className="text-destructive text-sm mt-2">{error.form}</div>}
     </form>
   )

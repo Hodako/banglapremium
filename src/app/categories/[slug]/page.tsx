@@ -1,21 +1,24 @@
-
 import { notFound } from 'next/navigation';
 import { ProductCard } from '@/components/product-card';
 import type { Metadata } from 'next';
-import { categories as staticCategories, products as staticProducts } from '@/lib/data';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
+import { Product, Category } from '@/lib/types';
+import { CLOUDFLARE_IMAGE_DELIVERY_URL } from '@/lib/constants';
 
 type Props = {
   params: { slug: string };
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const category = staticCategories.find(c => c.slug === params.slug);
-
-  if (!category) {
-    return {
-      title: 'Category not found',
-    };
+  const categoriesQuery = query(collection(firestore, "categories"), where("slug", "==", params.slug));
+  const querySnapshot = await getDocs(categoriesQuery);
+  
+  if (querySnapshot.empty) {
+    return { title: 'Category not found' };
   }
+  
+  const category = querySnapshot.docs[0].data() as Category;
 
   return {
     title: `${category.name} | Bangla Premium`,
@@ -24,13 +27,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function CategoryPage({ params }: { params: { slug: string } }) {
-  const category = staticCategories.find(c => c.slug === params.slug);
+  const categoriesQuery = query(collection(firestore, "categories"), where("slug", "==", params.slug));
+  const categorySnapshot = await getDocs(categoriesQuery);
 
-  if (!category) {
+  if (categorySnapshot.empty) {
     notFound();
   }
 
-  const categoryProducts = staticProducts.filter(p => p.category === category.name);
+  const category = {id: categorySnapshot.docs[0].id, ...categorySnapshot.docs[0].data()} as Category;
+
+  const productsQuery = query(collection(firestore, 'products'), where('categoryId', '==', category.id));
+  const productsSnapshot = await getDocs(productsQuery);
+  const categoryProducts = productsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})) as Product[];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -42,7 +50,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
       {categoryProducts.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {categoryProducts.map((product) => (
-            <ProductCard key={product.slug} product={product as any} />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (
@@ -56,7 +64,10 @@ export default async function CategoryPage({ params }: { params: { slug: string 
 }
 
 export async function generateStaticParams() {
-  return staticCategories.map((category) => ({
+  const categoriesSnapshot = await getDocs(collection(firestore, 'categories'));
+  const categories = categoriesSnapshot.docs.map(doc => doc.data() as Category);
+  
+  return categories.map((category) => ({
     slug: category.slug,
   }));
 }

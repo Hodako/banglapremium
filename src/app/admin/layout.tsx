@@ -8,6 +8,7 @@ import {
   Users,
   LineChart,
   Settings,
+  LayoutGrid,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -29,6 +30,7 @@ const menuItems = [
   { href: "/admin", label: "Dashboard", icon: Home },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { href: "/admin/products", label: "Products", icon: Package },
+  { href: "/admin/categories", label: "Categories", icon: LayoutGrid },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/analytics", label: "Analytics", icon: LineChart },
 ];

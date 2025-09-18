@@ -27,9 +27,14 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
+import { collection, getDocs } from "firebase/firestore";
+import { firestore } from "@/lib/firebase";
+import { User } from "@/lib/types";
 
 export default async function AdminCustomersPage() {
-  const customers = []; // Data will be fetched from Firestore later
+  const usersCollection = collection(firestore, "users");
+  const usersSnapshot = await getDocs(usersCollection);
+  const customers = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as User[];
   
   return (
     <Card>
@@ -37,7 +42,7 @@ export default async function AdminCustomersPage() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Customers</CardTitle>
-            <CardDescription>Manage your customers and view their details. (Firestore coming soon)</CardDescription>
+            <CardDescription>Manage your customers and view their details.</CardDescription>
           </div>
           <Button size="sm" className="gap-1" disabled>
              <PlusCircle className="h-3.5 w-3.5" />
@@ -64,11 +69,52 @@ export default async function AdminCustomersPage() {
              {customers.length === 0 && (
                 <TableRow>
                     <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
-                        No customers found. User data will be managed in Firestore.
+                        No customers found.
                     </TableCell>
                 </TableRow>
             )}
-            {/* Customers will be mapped here later */}
+            {customers.map(customer => (
+                <TableRow key={customer.id}>
+                    <TableCell>
+                        <div className="flex items-center gap-3">
+                            <Avatar>
+                                <AvatarImage src={customer.image || undefined} alt={customer.name || ''}/>
+                                <AvatarFallback>{customer.name?.charAt(0) || 'U'}</AvatarFallback>
+                            </Avatar>
+                            <div className="font-medium">{customer.name}</div>
+                        </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{customer.email}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                        <Badge variant={customer.role === 'admin' ? 'destructive' : 'outline'}>
+                            {customer.role || 'customer'}
+                        </Badge>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                        {/* Firestore adapter doesn't automatically add a joined date. This would need to be added manually on user creation. */}
+                        N/A
+                    </TableCell>
+                    <TableCell>
+                         <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                aria-haspopup="true"
+                                size="icon"
+                                variant="ghost"
+                                >
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Toggle menu</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem>View Details</DropdownMenuItem>
+                                <DropdownMenuItem>Make Admin</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </TableCell>
+                </TableRow>
+            ))}
           </TableBody>
         </Table>
       </CardContent>

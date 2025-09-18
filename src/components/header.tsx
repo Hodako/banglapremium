@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import Link from "next/link";
@@ -20,10 +19,11 @@ import {
 } from "@/components/ui/sheet";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import type { Product } from "@prisma/client";
+import type { Product } from "@/lib/types";
+import { CLOUDFLARE_IMAGE_DELIVERY_URL } from "@/lib/constants";
 
 export function Header() {
-  const { cart } = useCart();
+  const { itemCount } = useCart();
   const router = useRouter();
   const pathname = usePathname();
   const { data: session, status } = useSession();
@@ -36,8 +36,6 @@ export function Header() {
   const searchRef = useRef<HTMLDivElement>(null);
   
   const isLoggedIn = status === 'authenticated';
-
-  const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   const handleSearchSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -195,7 +193,7 @@ export function Header() {
                           className="flex items-center gap-4 px-4 py-2 hover:bg-muted"
                           onClick={() => setIsSuggestionsVisible(false)}
                         >
-                          <Image src={product.imageUrl!} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
+                          <Image src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${product.imageUrl}/thumbnail`} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
                           <div>
                             <p className="font-medium text-sm">{product.name}</p>
                             <p className="text-xs text-muted-foreground">৳{Number(product.price).toFixed(2)}</p>
@@ -231,9 +229,9 @@ export function Header() {
                 onClick={() => setIsCartOpen(true)}
               >
                 <ShoppingCart className="h-5 w-5" />
-                {cartItemCount > 0 && (
+                {itemCount > 0 && (
                   <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                    {cartItemCount}
+                    {itemCount}
                   </span>
                 )}
                 <span className="sr-only">Open cart</span>

@@ -1,9 +1,10 @@
 'use server';
 
-import prisma from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
 import { z } from 'zod';
+import { firestore } from '@/lib/firebase';
+import { collection, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 
 const productSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -22,28 +23,25 @@ export async function addProduct(formData: FormData) {
   const result = productSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (!result.success) {
-    // This is a simple error handling. In a real app, you'd want to
-    // return the errors to the form to display them to the user.
     console.error(result.error.formErrors.fieldErrors);
     return { error: result.error.formErrors };
   }
 
   const data = result.data;
-
-  await prisma.product.create({
-    data: {
-      name: data.name,
-      description: data.description,
-      longDescription: data.longDescription,
-      price: data.price,
-      originalPrice: data.originalPrice,
-      categoryId: data.categoryId,
-      imageUrl: data.imageUrl,
-      imageHint: data.imageHint,
-      isFeatured: data.isFeatured || false,
-      isBestSelling: data.isBestSelling || false,
-      slug: data.name.toLowerCase().replace(/\s+/g, '-'), // simple slug generation
-    },
+  
+  await addDoc(collection(firestore, 'products'), {
+    name: data.name,
+    description: data.description,
+    longDescription: data.longDescription || '',
+    price: data.price,
+    originalPrice: data.originalPrice || null,
+    categoryId: data.categoryId,
+    imageUrl: data.imageUrl,
+    imageHint: data.imageHint || '',
+    isFeatured: data.isFeatured || false,
+    isBestSelling: data.isBestSelling || false,
+    slug: data.name.toLowerCase().replace(/\s+/g, '-'), // simple slug generation
+    createdAt: new Date(),
   });
 
   revalidatePath('/admin/products');
@@ -59,37 +57,31 @@ export async function updateProduct(id: string, formData: FormData) {
   }
     
   const data = result.data;
-  const product = await prisma.product.findUnique({ where: { id } });
+  const productRef = doc(firestore, 'products', id);
 
-  if (product == null) return notFound();
-
-  await prisma.product.update({
-    where: { id },
-    data: {
-      name: data.name,
-      description: data.description,
-      longDescription: data.longDescription,
-      price: data.price,
-      originalPrice: data.originalPrice,
-      categoryId: data.categoryId,
-      imageUrl: data.imageUrl,
-      imageHint: data.imageHint,
-      isFeatured: data.isFeatured || false,
-      isBestSelling: data.isBestSelling || false,
-      slug: data.name.toLowerCase().replace(/\s+/g, '-'),
-    },
+  await updateDoc(productRef, {
+    name: data.name,
+    description: data.description,
+    longDescription: data.longDescription,
+    price: data.price,
+    originalPrice: data.originalPrice,
+    categoryId: data.categoryId,
+    imageUrl: data.imageUrl,
+    imageHint: data.imageHint,
+    isFeatured: data.isFeatured || false,
+    isBestSelling: data.isBestSelling || false,
+    slug: data.name.toLowerCase().replace(/\s+/g, '-'),
   });
 
   revalidatePath('/admin/products');
-  revalidatePath(`/products/${product.slug}`);
+  revalidatePath(`/products/${data.name.toLowerCase().replace(/\s+/g, '-')}`);
   redirect('/admin/products');
 }
 
 
 export async function deleteProduct(id: string) {
-  const product = await prisma.product.delete({ where: { id } });
-  if (product == null) return notFound();
-
+  await deleteDoc(doc(firestore, 'products', id));
+  
   revalidatePath('/admin/products');
   revalidatePath('/products');
 }

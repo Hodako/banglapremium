@@ -1,9 +1,15 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ProductForm } from "../_components/ProductForm";
+import { firestore } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
+import { Category } from "@/lib/types";
 
 export default async function NewProductPage() {
-    const categories = []; // Categories will be fetched from Firestore later
+    const categoriesCollection = collection(firestore, 'categories');
+    const categoriesSnapshot = await getDocs(categoriesCollection);
+    const categories = categoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Category[];
+
     return (
         <Card>
             <CardHeader>

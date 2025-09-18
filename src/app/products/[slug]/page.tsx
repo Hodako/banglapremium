@@ -5,17 +5,30 @@ import { CheckCircle, Shield } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { AddToCartButton } from './add-to-cart-button';
 import type { Metadata, ResolvingMetadata } from 'next';
-import { products as staticProducts } from '@/lib/data';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
+import { Product } from '@/lib/types';
+import { CLOUDFLARE_IMAGE_DELIVERY_URL } from '@/lib/constants';
 
 type Props = {
   params: { slug: string };
 };
 
+async function getProductBySlug(slug: string): Promise<Product | null> {
+    const productsQuery = query(collection(firestore, 'products'), where('slug', '==', slug));
+    const querySnapshot = await getDocs(productsQuery);
+    if (querySnapshot.empty) {
+        return null;
+    }
+    const doc = querySnapshot.docs[0];
+    return { id: doc.id, ...doc.data() } as Product;
+}
+
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const product = staticProducts.find(p => p.slug === params.slug);
+  const product = await getProductBySlug(params.slug);
 
   if (!product) {
     return {
@@ -26,26 +39,34 @@ export async function generateMetadata(
   return {
     title: `${product.name} | Bangla Premium`,
     description: product.description,
+    openGraph: {
+        images: [`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${product.imageUrl}/public`],
+    },
   };
 }
 
 export default async function ProductDetailPage({ params }: { params: { slug:string } }) {
-  const product = staticProducts.find(p => p.slug === params.slug);
+  const product = await getProductBySlug(params.slug);
 
   if (!product) {
     notFound();
   }
 
-  const relatedProducts = staticProducts.filter(p => 
-      p.category === product.category && p.slug !== product.slug
-  ).slice(0, 4);
+  const relatedProductsQuery = query(
+      collection(firestore, 'products'), 
+      where('categoryId', '==', product.categoryId),
+      where('id', '!=', product.id)
+    );
+  const relatedProductsSnapshot = await getDocs(relatedProductsQuery);
+  const relatedProducts = relatedProductsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)).slice(0, 4);
+
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12">
         <div className="relative aspect-video overflow-hidden rounded-lg shadow-lg">
           <Image
-            src={product.imageUrl!}
+            src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${product.imageUrl}/public`}
             alt={product.name}
             fill
             className="object-cover"
@@ -54,7 +75,7 @@ export default async function ProductDetailPage({ params }: { params: { slug:str
         </div>
         <div className="flex flex-col justify-center">
           <span className="text-sm font-semibold uppercase tracking-wider text-primary">
-            {product.category}
+            {product.categoryId}
           </span>
           <h1 className="font-headline mt-2 text-4xl font-extrabold tracking-tight">{product.name}</h1>
           <p className="mt-4 text-lg text-muted-foreground">{product.longDescription}</p>
@@ -63,7 +84,7 @@ export default async function ProductDetailPage({ params }: { params: { slug:str
             {product.originalPrice && <span className="text-2xl text-muted-foreground line-through">৳{Number(product.originalPrice).toFixed(2)}</span>}
           </div>
           <div className="mt-8">
-            <AddToCartButton product={product as any} />
+            <AddToCartButton product={product} />
           </div>
           <div className="mt-6 space-y-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
@@ -83,7 +104,7 @@ export default async function ProductDetailPage({ params }: { params: { slug:str
           <h2 className="text-2xl font-bold tracking-tight md:text-3xl font-headline">You Might Also Like</h2>
           <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {relatedProducts.map((p) => (
-              <ProductCard key={p.slug} product={p as any} />
+              <ProductCard key={p.id} product={p} />
             ))}
           </div>
         </div>
@@ -93,7 +114,10 @@ export default async function ProductDetailPage({ params }: { params: { slug:str
 }
 
 export async function generateStaticParams() {
-  return staticProducts.map((product) => ({
+  const productsSnapshot = await getDocs(collection(firestore, 'products'));
+  const products = productsSnapshot.docs.map(doc => doc.data() as Product);
+
+  return products.map((product) => ({
     slug: product.slug,
   }));
 }

@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import prisma from '@/lib/db';
+import { firestore } from '@/lib/firebase';
+import { collection, getDocs, query, where, limit, orderBy, startAt, endAt } from 'firebase/firestore';
+import { Category, Product } from '@/lib/types';
 
 const PRODUCTS_PER_PAGE = 8;
 const MAX_PRICE = 5000;
@@ -8,80 +10,66 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
   const page = Number(searchParams.get('page')) || 1;
-  const limit = Number(searchParams.get('limit')) || PRODUCTS_PER_PAGE;
-  const categorySlug = searchParams.get('category') || 'all';
+  const pageLimit = Number(searchParams.get('limit')) || PRODUCTS_PER_PAGE;
+  const categoryId = searchParams.get('category') || 'all';
   const sort = searchParams.get('sort') || 'popularity';
   const maxPrice = Number(searchParams.get('price')) || MAX_PRICE;
-  const query = searchParams.get('q');
+  const searchQuery = searchParams.get('q');
   const isFeatured = searchParams.get('featured') === 'true';
   const isBestSelling = searchParams.get('best_selling') === 'true';
 
-  const whereClause: any = {
-    price: {
-      lte: maxPrice,
-    },
-  };
-
-  if (categorySlug !== 'all') {
-    whereClause.category = {
-      slug: categorySlug,
-    };
-  }
-
-  if (query) {
-    whereClause.OR = [
-      { name: { contains: query, mode: 'insensitive' } },
-      { description: { contains: query, mode: 'insensitive' } },
-      { category: { name: { contains: query, mode: 'insensitive' } } },
-    ];
-  }
-
-  if (isFeatured) {
-    whereClause.isFeatured = true;
-  }
-  
-  if (isBestSelling) {
-    whereClause.isBestSelling = true;
-  }
-
-  let orderBy: any;
-  switch (sort) {
-    case 'price-asc':
-      orderBy = { price: 'asc' };
-      break;
-    case 'price-desc':
-      orderBy = { price: 'desc' };
-      break;
-    case 'newest':
-      orderBy = { releaseDate: 'desc' };
-      break;
-    case 'popularity':
-    default:
-      orderBy = [
-        { isBestSelling: 'desc' },
-        { isFeatured: 'desc' },
-        { name: 'asc' },
-      ];
-      break;
-  }
-  
   try {
-    const [products, totalProducts, categories] = await prisma.$transaction([
-        prisma.product.findMany({
-            where: whereClause,
-            orderBy: orderBy,
-            skip: (page - 1) * limit,
-            take: limit,
-            include: {
-              category: true,
-            }
-        }),
-        prisma.product.count({ where: whereClause }),
-        prisma.category.findMany(),
-    ]);
+    let q = query(collection(firestore, 'products'));
+
+    // Filtering
+    if (maxPrice < MAX_PRICE) {
+        q = query(q, where('price', '<=', maxPrice));
+    }
+    if (categoryId !== 'all') {
+        q = query(q, where('categoryId', '==', categoryId));
+    }
+    if (isFeatured) {
+        q = query(q, where('isFeatured', '==', true));
+    }
+    if (isBestSelling) {
+        q = query(q, where('isBestSelling', '==', true));
+    }
+    if (searchQuery) {
+      q = query(q, orderBy('name'), startAt(searchQuery), endAt(searchQuery + '\uf8ff'));
+    }
+
+
+    // Sorting
+    switch (sort) {
+        case 'price-asc':
+        q = query(q, orderBy('price', 'asc'));
+        break;
+        case 'price-desc':
+        q = query(q, orderBy('price', 'desc'));
+        break;
+        case 'newest':
+        q = query(q, orderBy('createdAt', 'desc'));
+        break;
+        case 'popularity':
+        default:
+        q = query(q, orderBy('isBestSelling', 'desc'), orderBy('isFeatured', 'desc'));
+        break;
+    }
+
+    const productsSnapshot = await getDocs(q);
+    
+    const allProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
+
+    // Pagination (manual for now as Firestore cursors are complex)
+    const totalProducts = allProducts.length;
+    const paginatedProducts = allProducts.slice((page - 1) * pageLimit, page * pageLimit);
+    
+    // Fetch categories separately
+    const categoriesSnapshot = await getDocs(collection(firestore, 'categories'));
+    const categories = categoriesSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()})) as Category[];
 
     return NextResponse.json({
-        products,
+        products: paginatedProducts,
         totalProducts,
         categories,
     });

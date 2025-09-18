@@ -1,17 +1,16 @@
-
 'use client';
 
 import { useCart } from '@/context/cart-context';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { Trash2, ShoppingCart, CreditCard } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingCart, ArrowRight, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { CLOUDFLARE_IMAGE_DELIVERY_URL } from '@/lib/constants';
 
 export default function CartPage() {
-  const { cart, removeFromCart, total } = useCart();
+  const { cart, removeFromCart, updateQuantity, total } = useCart();
 
   if (cart.length === 0) {
     return (
@@ -34,14 +33,15 @@ export default function CartPage() {
           <Card>
             <CardContent className="p-0">
               <div className="divide-y">
-                {cart.map((item) => (
-                  <div key={item.id} className="flex flex-col gap-4 p-4 sm:flex-row">
+                {cart.map((item, index) => (
+                  <div key={item.product.id} className="flex flex-col gap-4 p-4 sm:flex-row">
                     <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
                       <Image
                         src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${item.product.imageUrl}/public`}
                         alt={item.product.name}
                         fill
                         className="object-cover"
+                        data-ai-hint={item.product.imageHint}
                       />
                     </div>
                     <div className="flex flex-grow flex-col justify-between gap-2 sm:gap-0">
@@ -49,15 +49,34 @@ export default function CartPage() {
                         <h2 className="font-medium hover:underline">
                           <Link href={`/products/${item.product.slug}`}>{item.product.name}</Link>
                         </h2>
-                        <p className="font-semibold">৳{item.product.price.toFixed(2)}</p>
+                        <p className="font-semibold">৳{(item.product.price * item.quantity).toFixed(2)}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">1 Unit</p>
-                      <div className="flex items-center justify-end">
+                      <p className="text-sm text-muted-foreground">৳{item.product.price.toFixed(2)} each</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <span>{item.quantity}</span>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
                         <Button
                           variant="ghost"
                           size="sm"
                           className="text-muted-foreground hover:text-destructive"
-                          onClick={() => removeFromCart(item.id)}
+                          onClick={() => removeFromCart(item.product.id)}
                         >
                           <Trash2 className="mr-1 h-4 w-4" />
                           Remove

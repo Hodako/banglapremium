@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -16,6 +17,8 @@ import { Separator } from "@/components/ui/separator";
 import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { CLOUDFLARE_IMAGE_DELIVERY_URL } from "@/lib/constants";
+import { Input } from "./ui/input";
 
 interface CartSheetProps {
   open: boolean;
@@ -23,7 +26,7 @@ interface CartSheetProps {
 }
 
 export function CartSheet({ open, onOpenChange }: CartSheetProps) {
-  const { cart, removeFromCart, updateQuantity, total } = useCart();
+  const { cart, removeFromCart, updateRecipientEmail, total } = useCart();
   const router = useRouter();
 
   const handleCheckout = () => {
@@ -46,14 +49,13 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
             <ScrollArea className="flex-grow pr-4">
               <div className="flex flex-col gap-6">
                 {cart.map((item) => (
-                  <div key={item.product.id} className="flex gap-4">
-                    <div className="relative h-20 w-20 overflow-hidden rounded-md">
+                  <div key={item.id} className="flex gap-4">
+                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-md">
                       <Image
-                        src={item.product.imageUrl}
+                        src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${item.product.imageUrl}/public`}
                         alt={item.product.name}
                         fill
                         className="object-cover"
-                        data-ai-hint={item.product.imageHint}
                       />
                     </div>
                     <div className="flex flex-grow flex-col justify-between">
@@ -68,34 +70,12 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
                         </p>
                       </div>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() =>
-                              updateQuantity(item.product.id, item.quantity - 1)
-                            }
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="w-5 text-center text-sm">{item.quantity}</span>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() =>
-                              updateQuantity(item.product.id, item.quantity + 1)
-                            }
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        <Button
+                         <p className="text-sm font-medium">1 Unit</p>
+                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                          onClick={() => removeFromCart(item.product.id)}
+                          onClick={() => removeFromCart(item.id)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

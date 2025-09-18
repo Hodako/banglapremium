@@ -1,9 +1,19 @@
 import { MetadataRoute } from 'next';
-import { products, categories } from '@/lib/data';
+import { collection, getDocs } from 'firebase/firestore';
+import { firestore } from './lib/firebase';
+import { Product, Category } from './lib/types';
+
 
 const BASE_URL = 'https://your-domain.com'; // Replace with your actual domain
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const productsSnapshot = await getDocs(collection(firestore, 'products'));
+  const products = productsSnapshot.docs.map(doc => doc.data() as Product);
+
+  const categoriesSnapshot = await getDocs(collection(firestore, 'categories'));
+  const categories = categoriesSnapshot.docs.map(doc => doc.data() as Category);
+
+
   const productUrls = products.map((product) => ({
     url: `${BASE_URL}/products/${product.slug}`,
     lastModified: new Date(),

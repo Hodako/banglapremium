@@ -1,6 +1,3 @@
-
-'use client';
-
 import {
   Card,
   CardContent,
@@ -15,7 +12,35 @@ import {
   Activity,
 } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { useEffect, useState } from "react";
+import { collection, getDocs, limit, query, where } from "firebase/firestore";
+import { firestore } from "@/lib/firebase";
+import { Order, User } from "@/lib/types";
+
+async function getDashboardData() {
+    const productsQuery = collection(firestore, "products");
+    const usersQuery = collection(firestore, "users");
+    const ordersQuery = collection(firestore, "orders");
+
+    const [productsSnapshot, usersSnapshot, ordersSnapshot] = await Promise.all([
+        getDocs(productsQuery),
+        getDocs(usersQuery),
+        getDocs(ordersQuery)
+    ]);
+
+    const totalProducts = productsSnapshot.size;
+    const totalCustomers = usersSnapshot.size;
+    const totalOrders = ordersSnapshot.size;
+    const totalRevenue = ordersSnapshot.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0);
+
+    const recentOrders = ordersSnapshot.docs
+        .sort((a, b) => b.data().createdAt.toDate() - a.data().createdAt.toDate())
+        .slice(0, 5)
+        .map(doc => ({ id: doc.id, ...doc.data() } as Order));
+
+
+    return { totalProducts, totalCustomers, totalOrders, totalRevenue, recentOrders };
+}
+
 
 // This is a placeholder. In a real app, you would fetch this data from your backend.
 const salesData = [
@@ -27,16 +52,8 @@ const salesData = [
     { name: 'Jun', revenue: 5500 },
 ];
 
-export default function AdminDashboardPage() {
-    // Data fetching is removed as we no longer have a database connected for products/orders.
-    // This will be rebuilt on top of Firestore in a future step.
-    const [dashboardData, setDashboardData] = useState({
-        totalRevenue: 0,
-        totalOrders: 0,
-        totalCustomers: 0,
-        totalProducts: 0,
-        recentOrders: []
-    });
+export default async function AdminDashboardPage() {
+    const dashboardData = await getDashboardData();
 
   return (
     <div className="space-y-6">
@@ -50,7 +67,7 @@ export default function AdminDashboardPage() {
             <div className="text-2xl font-bold">
               ৳{Number(dashboardData.totalRevenue).toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">Data from Firestore coming soon</p>
+            <p className="text-xs text-muted-foreground">{dashboardData.totalOrders} orders</p>
           </CardContent>
         </Card>
         <Card>
@@ -60,7 +77,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+{dashboardData.totalOrders}</div>
-             <p className="text-xs text-muted-foreground">Data from Firestore coming soon</p>
+             <p className="text-xs text-muted-foreground">From all time</p>
           </CardContent>
         </Card>
         <Card>
@@ -80,7 +97,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{dashboardData.totalProducts}</div>
-             <p className="text-xs text-muted-foreground">Data from Firestore coming soon</p>
+             <p className="text-xs text-muted-foreground">In your inventory</p>
           </CardContent>
         </Card>
       </div>
@@ -108,13 +125,27 @@ export default function AdminDashboardPage() {
           <CardHeader>
             <CardTitle>Recent Orders</CardTitle>
             <CardDescription>
-              This will show recent orders from Firestore.
+              A list of the 5 most recent orders.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-                Order data coming soon...
-            </div>
+            {dashboardData.recentOrders.length > 0 ? (
+                <div className="space-y-4">
+                    {dashboardData.recentOrders.map(order => (
+                        <div key={order.id} className="flex items-center">
+                            <div className="flex-1 space-y-1">
+                                <p className="text-sm font-medium leading-none">{order.userId}</p>
+                                <p className="text-sm text-muted-foreground">{order.transactionId}</p>
+                            </div>
+                             <div className="ml-auto font-medium">৳{order.total.toFixed(2)}</div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                 <div className="text-center py-8 text-muted-foreground">
+                    No recent orders found.
+                </div>
+            )}
           </CardContent>
         </Card>
       </div>

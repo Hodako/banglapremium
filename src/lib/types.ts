@@ -1,7 +1,4 @@
 
-// The Prisma types are removed as we are no longer using Prisma.
-// These will be replaced with Firestore-specific types as we build out the data models.
-
 export type Product = {
   id: string;
   name: string;
@@ -16,7 +13,7 @@ export type Product = {
   isFeatured?: boolean;
   isBestSelling?: boolean;
   releaseDate?: string | null;
-  category: { name: string; } | null;
+  category?: { name: string; }; 
 };
 
 export type Category = {
@@ -29,12 +26,31 @@ export type Category = {
 };
 
 export interface CartItem {
+  id: string; // Unique identifier for each item in the cart
   product: Product;
-  quantity: number;
   recipientEmail?: string;
 }
 
-// These are placeholder types. They will be updated.
-export type Order = any; 
-export type OrderItem = any;
-export type User = any;
+export type Order = {
+    id: string;
+    userId: string;
+    items: {
+      productName: string;
+      price: number;
+      recipientEmail: string;
+    }[];
+    total: number;
+    transactionId: string;
+    status: 'pending' | 'processing' | 'delivered';
+    createdAt: {
+        toDate: () => Date;
+    };
+};
+
+export type User = {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    role?: 'admin' | 'customer';
+};

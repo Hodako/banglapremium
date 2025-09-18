@@ -2,7 +2,10 @@
 import { ProductCard } from '@/components/product-card';
 import type { Metadata } from 'next';
 import { Star } from 'lucide-react';
-import prisma from '@/lib/db';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
+import { Product } from '@/lib/types';
+
 
 export const metadata: Metadata = {
   title: 'Best Sellers | Bangla Premium',
@@ -10,9 +13,9 @@ export const metadata: Metadata = {
 };
 
 export default async function BestSellersPage() {
-  const bestSellingProducts = await prisma.product.findMany({
-    where: { isBestSelling: true },
-  });
+  const productsQuery = query(collection(firestore, 'products'), where('isBestSelling', '==', true));
+  const querySnapshot = await getDocs(productsQuery);
+  const bestSellingProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data()})) as Product[];
 
   return (
     <div className="container mx-auto px-4 py-8">

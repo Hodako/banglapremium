@@ -1,8 +1,6 @@
 
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
-import { products } from "@/lib/data";
-import prisma from "@/lib/db";
 import { Heart } from "lucide-react";
 import Link from "next/link";
 

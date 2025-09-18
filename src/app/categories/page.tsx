@@ -5,7 +5,10 @@ import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
-import { categories as staticCategories } from '@/lib/data';
+import { firestore } from '@/lib/firebase';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { Category } from '@/lib/types';
+import { CLOUDFLARE_IMAGE_DELIVERY_URL } from '@/lib/constants';
 
 
 export const metadata: Metadata = {
@@ -14,8 +17,13 @@ export const metadata: Metadata = {
 };
 
 export default async function CategoriesPage() {
-  // Using static data as a placeholder until Firestore is integrated for products/categories
-  const categories = staticCategories;
+  const categoriesQuery = query(collection(firestore, 'categories'), orderBy('name', 'asc'));
+  const querySnapshot = await getDocs(categoriesQuery);
+  const categories = querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  })) as Category[];
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -30,7 +38,7 @@ export default async function CategoriesPage() {
             <Card className="h-full overflow-hidden transition-all group-hover:shadow-lg group-hover:-translate-y-1">
               <div className="relative h-40 w-full">
                 <Image
-                  src={category.imageUrl!}
+                  src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${category.imageUrl}/public`}
                   alt={category.name}
                   fill
                   className="object-cover"

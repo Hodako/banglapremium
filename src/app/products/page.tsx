@@ -23,7 +23,7 @@ import { ArrowLeft, ArrowRight, ListFilter } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Product, Category } from '@prisma/client';
+import { Product, Category } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const PRODUCTS_PER_PAGE = 8;
@@ -86,7 +86,7 @@ function Filters({ categories, isMobile, closeSheet }: { categories: Category[],
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
             {categories.map(cat => (
-              <SelectItem key={cat.id} value={cat.slug}>{cat.name}</SelectItem>
+              <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>

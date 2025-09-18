@@ -1,17 +1,19 @@
+
 "use client";
 
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import type { CartItem, Product } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { v4 as uuidv4 } from 'uuid';
 
 interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product, quantity?: number) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  updateRecipientEmail: (productId: string, email: string) => void;
+  removeFromCart: (cartItemId: string) => void;
+  updateRecipientEmail: (cartItemId: string, email: string) => void;
   clearCart: () => void;
   total: number;
+  itemCount: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -40,45 +42,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [cart]);
 
   const addToCart = (product: Product, quantity = 1) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find(
-        (item) => item.product.id === product.id
-      );
-      if (existingItem) {
-        return prevCart.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      }
-      return [...prevCart, { product, quantity }];
-    });
+    const newCartItems: CartItem[] = [];
+    for (let i = 0; i < quantity; i++) {
+        newCartItems.push({
+            id: uuidv4(), // Assign a unique ID to each item instance
+            product: product,
+        });
+    }
+    setCart(prevCart => [...prevCart, ...newCartItems]);
     toast({
       title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
+      description: `${quantity} x ${product.name} has been added.`,
     });
   };
 
-  const removeFromCart = (productId: string) => {
-    setCart((prevCart) => prevCart.filter((item) => item.product.id !== productId));
+  const removeFromCart = (cartItemId: string) => {
+    setCart((prevCart) => prevCart.filter((item) => item.id !== cartItemId));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
-    }
+  const updateRecipientEmail = (cartItemId: string, email: string) => {
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
-      )
-    );
-  };
-
-  const updateRecipientEmail = (productId: string, email: string) => {
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.product.id === productId ? { ...item, recipientEmail: email } : item
+        item.id === cartItemId ? { ...item, recipientEmail: email } : item
       )
     );
   };
@@ -88,9 +73,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const total = cart.reduce(
-    (acc, item) => acc + item.product.price * item.quantity,
+    (acc, item) => acc + item.product.price,
     0
   );
+  
+  const itemCount = cart.length;
 
   return (
     <CartContext.Provider
@@ -98,10 +85,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         cart,
         addToCart,
         removeFromCart,
-        updateQuantity,
         updateRecipientEmail,
         clearCart,
         total,
+        itemCount
       }}
     >
       {children}

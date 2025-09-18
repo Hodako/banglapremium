@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { ProductCard } from '@/components/product-card';
 import { Suspense, useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Product } from '@prisma/client';
+import { Product } from '@/lib/types';
 
 function SearchResults() {
   const searchParams = useSearchParams();

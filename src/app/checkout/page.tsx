@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useCart } from "@/context/cart-context";
@@ -7,7 +6,6 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
   Card,
@@ -16,7 +14,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -30,19 +28,23 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal } from "lucide-react";
+import { Terminal, Lock } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/hooks/use-toast";
-
+import { addDoc, collection } from "firebase/firestore";
+import { firestore } from "@/lib/firebase";
+import { CLOUDFLARE_IMAGE_DELIVERY_URL } from "@/lib/constants";
+import { AnimatePresence, motion } from "framer-motion";
 
 const checkoutSchema = z.object({
   transactionId: z.string().min(5, "Transaction ID is required"),
   items: z.array(
     z.object({
       productId: z.string(),
-      recipientEmail: z
-        .string()
-        .email("Invalid email address for recipient"),
+      productName: z.string(),
+      price: z.number(),
+      recipientEmail: z.string().email("Invalid email address for recipient"),
+      uniqueCartId: z.string(),
     })
   ),
 });
@@ -62,7 +64,10 @@ export default function CheckoutPage() {
       transactionId: "",
       items: cart.map(item => ({
         productId: item.product.id,
+        productName: item.product.name,
+        price: item.product.price,
         recipientEmail: item.recipientEmail || user?.email || "",
+        uniqueCartId: item.id,
       })),
     },
   });
@@ -72,16 +77,14 @@ export default function CheckoutPage() {
        transactionId: "",
        items: cart.map(item => ({
         productId: item.product.id,
+        productName: item.product.name,
+        price: item.product.price,
         recipientEmail: item.recipientEmail || user?.email || "",
+        uniqueCartId: item.id,
       })),
     })
   }, [cart, user, form])
 
-
-  const { fields } = useFieldArray({
-    control: form.control,
-    name: "items",
-  });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -93,12 +96,40 @@ export default function CheckoutPage() {
   }, [cart.length, router, status]);
 
   const onSubmit = async (data: CheckoutFormValues) => {
-    toast({
-        variant: "destructive",
-        title: "Order Failed",
-        description: "Order processing is temporarily disabled pending database migration."
-    });
-    return;
+    if (!user?.id) {
+        toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "You must be logged in to place an order."
+        });
+        return;
+    }
+    try {
+        const orderData = {
+            userId: user.id,
+            items: data.items.map(({ productName, price, recipientEmail }) => ({ productName, price, recipientEmail })),
+            total: total,
+            transactionId: data.transactionId,
+            status: 'pending',
+            createdAt: new Date()
+        }
+        await addDoc(collection(firestore, 'orders'), orderData);
+        
+        clearCart();
+        toast({
+            title: "Order Placed!",
+            description: "Your order has been successfully placed."
+        });
+        router.push(`/order-confirmation?total=${total}`);
+
+    } catch (error) {
+         toast({
+            variant: "destructive",
+            title: "Order Failed",
+            description: "There was a problem placing your order. Please try again."
+        });
+        console.error("Order submission error: ", error);
+    }
   };
 
   if (status === 'loading' || (status === 'authenticated' && cart.length === 0) || !user) {
@@ -112,7 +143,12 @@ export default function CheckoutPage() {
   return (
     <div className="container mx-auto min-h-[80vh] px-4 py-8">
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-        <div className="order-2 lg:order-1">
+        <motion.div 
+            className="order-2 lg:order-1"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+        >
           <Card>
             <CardHeader>
               <CardTitle>Payment Details</CardTitle>
@@ -155,39 +191,56 @@ export default function CheckoutPage() {
                   />
                   
                   <div className="space-y-4">
-                     <Label>Recipient Emails</Label>
+                     <FormLabel>Recipient Emails</FormLabel>
                       <p className="text-sm text-muted-foreground">Enter the email where each subscription should be sent.</p>
-                     {fields.map((field, index) => {
-                        const cartItem = cart[index];
-                        return (
-                             <FormField
-                                key={field.id}
-                                control={form.control}
-                                name={`items.${index}.recipientEmail`}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="font-normal">{cartItem.product.name}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="recipient@example.com" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        )
-                     })}
+                      <AnimatePresence>
+                         {form.getValues('items').map((item, index) => (
+                            <motion.div
+                                key={item.uniqueCartId}
+                                layout
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name={`items.${index}.recipientEmail`}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="font-normal">{item.productName}</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="recipient@example.com" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                             </motion.div>
+                         ))}
+                      </AnimatePresence>
                   </div>
 
                   <Button type="submit" size="lg" className="w-full" disabled={form.formState.isSubmitting}>
-                    {form.formState.isSubmitting ? 'Placing Order...' : 'Complete Purchase'}
+                    {form.formState.isSubmitting ? 'Placing Order...' : (
+                        <>
+                            <Lock className="mr-2 h-4 w-4" />
+                            Complete Purchase
+                        </>
+                    )}
                   </Button>
                 </form>
               </Form>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
-        <div className="order-1 lg:order-2">
+        <motion.div 
+            className="order-1 lg:order-2"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+        >
           <Card className="sticky top-24">
             <CardHeader>
               <CardTitle>Order Summary</CardTitle>
@@ -196,26 +249,29 @@ export default function CheckoutPage() {
               <ScrollArea className="h-[300px] pr-4">
                 <div className="space-y-4">
                   {cart.map((item) => (
-                    <div key={item.product.id} className="flex items-center justify-between">
+                    <motion.div 
+                        key={item.id} 
+                        className="flex items-center justify-between"
+                        layout
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                    >
                       <div className="flex items-center gap-4">
                         <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-md">
                           <Image
-                            src={item.product.imageUrl}
+                            src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${item.product.imageUrl}/public`}
                             alt={item.product.name}
                             fill
                             className="object-cover"
-                            data-ai-hint={item.product.imageHint}
                           />
-                           <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                            {item.quantity}
-                          </span>
                         </div>
                         <div>
                           <p className="font-medium">{item.product.name}</p>
+                          <p className="text-sm text-muted-foreground">1 Unit</p>
                         </div>
                       </div>
-                      <p className="font-medium">৳{(item.product.price * item.quantity).toFixed(2)}</p>
-                    </div>
+                      <p className="font-medium">৳{item.product.price.toFixed(2)}</p>
+                    </motion.div>
                   ))}
                 </div>
               </ScrollArea>
@@ -237,7 +293,7 @@ export default function CheckoutPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

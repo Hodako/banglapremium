@@ -21,6 +21,8 @@ import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import type { Product } from "@/lib/types";
 
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH}`
+
 export function Header() {
   const { itemCount } = useCart();
   const router = useRouter();
@@ -192,7 +194,7 @@ export function Header() {
                           className="flex items-center gap-4 px-4 py-2 hover:bg-muted"
                           onClick={() => setIsSuggestionsVisible(false)}
                         >
-                          <Image src={product.imageUrl} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
+                          <Image src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${product.imageUrl}/public`} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
                           <div>
                             <p className="font-medium text-sm">{product.name}</p>
                             <p className="text-xs text-muted-foreground">৳{Number(product.price).toFixed(2)}</p>

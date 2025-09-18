@@ -7,10 +7,11 @@ import { Minus, Plus, Trash2, ShoppingCart, ArrowRight, CreditCard } from 'lucid
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { CLOUDFLARE_IMAGE_DELIVERY_URL } from '@/lib/cloudflare';
+
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH}`
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateQuantity, total } = useCart();
+  const { cart, removeFromCart, total } = useCart();
 
   if (cart.length === 0) {
     return (
@@ -34,7 +35,7 @@ export default function CartPage() {
             <CardContent className="p-0">
               <div className="divide-y">
                 {cart.map((item, index) => (
-                  <div key={item.product.id} className="flex flex-col gap-4 p-4 sm:flex-row">
+                  <div key={item.id} className="flex flex-col gap-4 p-4 sm:flex-row">
                     <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
                       <Image
                         src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${item.product.imageUrl}/public`}
@@ -49,34 +50,15 @@ export default function CartPage() {
                         <h2 className="font-medium hover:underline">
                           <Link href={`/products/${item.product.slug}`}>{item.product.name}</Link>
                         </h2>
-                        <p className="font-semibold">৳{(item.product.price * item.quantity).toFixed(2)}</p>
+                        <p className="font-semibold">৳{item.product.price.toFixed(2)}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">৳{item.product.price.toFixed(2)} each</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span>{item.quantity}</span>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
+                      <p className="text-sm text-muted-foreground">1 Unit</p>
+                      <div className="flex items-center justify-end">
                         <Button
                           variant="ghost"
                           size="sm"
                           className="text-muted-foreground hover:text-destructive"
-                          onClick={() => removeFromCart(item.product.id)}
+                          onClick={() => removeFromCart(item.id)}
                         >
                           <Trash2 className="mr-1 h-4 w-4" />
                           Remove

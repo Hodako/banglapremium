@@ -9,7 +9,7 @@ import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firesto
 import { firestore } from '@/lib/firebase';
 import { Product } from '@/lib/types';
 
-const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.CLOUDFLARE_ACCOUNT_HASH}`
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH}`
 
 type Props = {
   params: { slug: string };

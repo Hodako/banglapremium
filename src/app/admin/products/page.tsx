@@ -30,7 +30,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { firestore } from "@/lib/firebase";
 import { Product } from "@/lib/types";
 
-const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.CLOUDFLARE_ACCOUNT_HASH}`
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH}`
 
 export default async function AdminProductsPage() {
   const productsCollection = collection(firestore, "products");

@@ -28,6 +28,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const PRODUCTS_PER_PAGE = 8;
 const MAX_PRICE = 5000;
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH}`
 
 
 function Filters({ categories, isMobile, closeSheet }: { categories: Category[], isMobile: boolean, closeSheet?: () => void }) {
@@ -179,7 +180,7 @@ export default function ProductsPage() {
       try {
         const res = await fetch(`/api/products?${params.toString()}`);
         const data = await res.json();
-        setProducts(data.products);
+        setProducts(data.products.map((p: Product) => ({...p, imageUrl: `${CLOUDFLARE_IMAGE_DELIVERY_URL}/${p.imageUrl}/public`})));
         setCategories(data.categories);
         setTotalProducts(data.totalProducts);
       } catch (error) {

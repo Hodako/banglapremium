@@ -35,6 +35,8 @@ import { addDoc, collection } from "firebase/firestore";
 import { firestore } from "@/lib/firebase";
 import { AnimatePresence, motion } from "framer-motion";
 
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH}`
+
 const checkoutSchema = z.object({
   transactionId: z.string().min(5, "Transaction ID is required"),
   items: z.array(
@@ -258,7 +260,7 @@ export default function CheckoutPage() {
                       <div className="flex items-center gap-4">
                         <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-md">
                           <Image
-                            src={item.product.imageUrl}
+                            src={`${CLOUDFLARE_IMAGE_DELIVERY_URL}/${item.product.imageUrl}/public`}
                             alt={item.product.name}
                             fill
                             className="object-cover"

@@ -7,6 +7,8 @@ import { Suspense, useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Product } from '@/lib/types';
 
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH}`
+
 function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q');
@@ -19,7 +21,7 @@ function SearchResults() {
       fetch(`/api/products?q=${query}`)
         .then(res => res.json())
         .then(data => {
-          setProducts(data.products);
+          setProducts(data.products.map((p: Product) => ({...p, imageUrl: `${CLOUDFLARE_IMAGE_DELIVERY_URL}/${p.imageUrl}/public`})));
           setIsLoading(false);
         })
         .catch(() => setIsLoading(false));

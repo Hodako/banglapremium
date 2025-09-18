@@ -19,6 +19,8 @@ import { useEffect, useState } from 'react';
 import { Product, Category } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH}`
+
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [bestSellingProducts, setBestSellingProducts] = useState<Product[]>([]);
@@ -43,9 +45,9 @@ export default function Home() {
         const bestSellersData = await bestSellersRes.json();
         const categoriesData = await categoriesRes.json();
 
-        setFeaturedProducts(featuredData.products);
-        setBestSellingProducts(bestSellersData.products);
-        setTopCategories(categoriesData.slice(0, 4));
+        setFeaturedProducts(featuredData.products.map((p: Product) => ({...p, imageUrl: `${CLOUDFLARE_IMAGE_DELIVERY_URL}/${p.imageUrl}/public`})));
+        setBestSellingProducts(bestSellersData.products.map((p: Product) => ({...p, imageUrl: `${CLOUDFLARE_IMAGE_DELIVERY_URL}/${p.imageUrl}/public`})));
+        setTopCategories(categoriesData.slice(0, 4).map((c: Category) => ({...c, imageUrl: `${CLOUDFLARE_IMAGE_DELIVERY_URL}/${c.imageUrl}/public`})));
 
       } catch (error) {
         console.error('Failed to fetch homepage data', error);

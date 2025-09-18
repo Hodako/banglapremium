@@ -6,6 +6,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 import { Product } from '@/lib/types';
 
+const CLOUDFLARE_IMAGE_DELIVERY_URL = `https://imagedelivery.net/${process.env.NEXT_PUBLIC_CLOUDFLARE_ACCOUNT_HASH}`
 
 export const metadata: Metadata = {
   title: 'Best Sellers | Bangla Premium',
@@ -15,7 +16,14 @@ export const metadata: Metadata = {
 export default async function BestSellersPage() {
   const productsQuery = query(collection(firestore, 'products'), where('isBestSelling', '==', true));
   const querySnapshot = await getDocs(productsQuery);
-  const bestSellingProducts = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data()})) as Product[];
+  const bestSellingProducts = querySnapshot.docs.map(doc => {
+      const data = doc.data() as Product
+      return { 
+          id: doc.id, ...data, 
+          imageUrl: `${CLOUDFLARE_IMAGE_DELIVERY_URL}/${data.imageUrl}/public` 
+      } as Product
+    }
+  );
 
   return (
     <div className="container mx-auto px-4 py-8">

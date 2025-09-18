@@ -1,9 +1,9 @@
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ProductForm } from "../_components/ProductForm";
-import prisma from "@/lib/db";
 
 export default async function NewProductPage() {
-    const categories = await prisma.category.findMany();
+    const categories = []; // Categories will be fetched from Firestore later
     return (
         <Card>
             <CardHeader>

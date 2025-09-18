@@ -2,16 +2,14 @@
 import { notFound } from 'next/navigation';
 import { ProductCard } from '@/components/product-card';
 import type { Metadata } from 'next';
-import prisma from '@/lib/db';
+import { categories as staticCategories, products as staticProducts } from '@/lib/data';
 
 type Props = {
   params: { slug: string };
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const category = await prisma.category.findUnique({
-    where: { slug: params.slug },
-  });
+  const category = staticCategories.find(c => c.slug === params.slug);
 
   if (!category) {
     return {
@@ -26,17 +24,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function CategoryPage({ params }: { params: { slug: string } }) {
-  const category = await prisma.category.findUnique({
-    where: { slug: params.slug },
-  });
+  const category = staticCategories.find(c => c.slug === params.slug);
 
   if (!category) {
     notFound();
   }
 
-  const categoryProducts = await prisma.product.findMany({
-    where: { categoryId: category.id },
-  });
+  const categoryProducts = staticProducts.filter(p => p.category === category.name);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -48,7 +42,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
       {categoryProducts.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {categoryProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.slug} product={product as any} />
           ))}
         </div>
       ) : (
@@ -62,8 +56,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
 }
 
 export async function generateStaticParams() {
-  const categories = await prisma.category.findMany();
-  return categories.map((category) => ({
+  return staticCategories.map((category) => ({
     slug: category.slug,
   }));
 }

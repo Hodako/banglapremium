@@ -5,7 +5,7 @@ import { CheckCircle, Shield } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { AddToCartButton } from './add-to-cart-button';
 import type { Metadata, ResolvingMetadata } from 'next';
-import prisma from '@/lib/db';
+import { products as staticProducts } from '@/lib/data';
 
 type Props = {
   params: { slug: string };
@@ -15,9 +15,7 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
-  });
+  const product = staticProducts.find(p => p.slug === params.slug);
 
   if (!product) {
     return {
@@ -32,21 +30,15 @@ export async function generateMetadata(
 }
 
 export default async function ProductDetailPage({ params }: { params: { slug:string } }) {
-  const product = await prisma.product.findUnique({
-      where: { slug: params.slug },
-  });
+  const product = staticProducts.find(p => p.slug === params.slug);
 
   if (!product) {
     notFound();
   }
 
-  const relatedProducts = await prisma.product.findMany({
-      where: { 
-          categoryId: product.categoryId,
-          id: { not: product.id },
-      },
-      take: 4,
-  });
+  const relatedProducts = staticProducts.filter(p => 
+      p.category === product.category && p.slug !== product.slug
+  ).slice(0, 4);
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -61,11 +53,9 @@ export default async function ProductDetailPage({ params }: { params: { slug:str
           />
         </div>
         <div className="flex flex-col justify-center">
-          {product.categoryId && 
-            <span className="text-sm font-semibold uppercase tracking-wider text-primary">
-              {(await prisma.category.findUnique({ where: { id: product.categoryId } }))?.name}
-            </span>
-          }
+          <span className="text-sm font-semibold uppercase tracking-wider text-primary">
+            {product.category}
+          </span>
           <h1 className="font-headline mt-2 text-4xl font-extrabold tracking-tight">{product.name}</h1>
           <p className="mt-4 text-lg text-muted-foreground">{product.longDescription}</p>
           <div className="mt-6 flex items-baseline gap-4">
@@ -73,7 +63,7 @@ export default async function ProductDetailPage({ params }: { params: { slug:str
             {product.originalPrice && <span className="text-2xl text-muted-foreground line-through">৳{Number(product.originalPrice).toFixed(2)}</span>}
           </div>
           <div className="mt-8">
-            <AddToCartButton product={product} />
+            <AddToCartButton product={product as any} />
           </div>
           <div className="mt-6 space-y-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
@@ -93,7 +83,7 @@ export default async function ProductDetailPage({ params }: { params: { slug:str
           <h2 className="text-2xl font-bold tracking-tight md:text-3xl font-headline">You Might Also Like</h2>
           <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {relatedProducts.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard key={p.slug} product={p as any} />
             ))}
           </div>
         </div>
@@ -103,8 +93,7 @@ export default async function ProductDetailPage({ params }: { params: { slug:str
 }
 
 export async function generateStaticParams() {
-  const products = await prisma.product.findMany({ select: { slug: true }});
-  return products.map((product) => ({
+  return staticProducts.map((product) => ({
     slug: product.slug,
   }));
 }

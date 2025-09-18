@@ -1,24 +1,16 @@
 
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Terminal } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { signIn } from "next-auth/react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 function GoogleIcon() {
   return (
@@ -27,133 +19,26 @@ function GoogleIcon() {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
-
-
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    });
-    
-    setIsLoading(false);
-
-    if (result?.error) {
-       if (result.error === 'CredentialsSignin') {
-         setError('Invalid email or password. Please try again.');
-       } else {
-         setError('An unexpected error occurred. Please try again.');
-       }
-    } else if (result?.ok) {
-      router.push(callbackUrl);
-    }
-  };
 
   const handleGoogleSignIn = async () => {
-    setIsLoading(true);
-    setError(null);
-    await signIn('google', { callbackUrl });
+    await signIn('google', { callbackUrl: '/' });
   }
 
   return (
     <div className="container mx-auto flex min-h-[80vh] items-center justify-center px-4 py-12">
       <Card className="w-full max-w-md border-0 shadow-none sm:border sm:shadow-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome Back!</CardTitle>
+          <CardTitle className="text-2xl">Welcome!</CardTitle>
           <CardDescription>
-            Enter your email and password to access your account.
+            Sign in to access your account and start shopping.
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleLogin}>
-          <CardContent className="space-y-4">
-             {error && (
-                <Alert variant="destructive">
-                    <Terminal className="h-4 w-4" />
-                    <AlertTitle>Login Failed</AlertTitle>
-                    <AlertDescription>
-                        {error}
-                    </AlertDescription>
-                </Alert>
-             )}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                 <Link
-                    href="#"
-                    className="text-sm text-primary hover:underline"
-                  >
-                    Forgot your password?
-                  </Link>
-              </div>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoading}
-                />
-                 <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"
-                    onClick={() => setShowPassword(!showPassword)}
-                    disabled={isLoading}
-                  >
-                    {showPassword ? <EyeOff /> : <Eye />}
-                    <span className="sr-only">Toggle password visibility</span>
-                  </Button>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing In...' : 'Sign In'}
-            </Button>
-             <div className="relative w-full">
-                <Separator className="absolute left-0 top-1/2 -translate-y-1/2 w-full" />
-                <span className="relative z-10 bg-card px-2 text-xs uppercase text-muted-foreground">Or continue with</span>
-            </div>
-             <Button variant="outline" className="w-full" type="button" onClick={handleGoogleSignIn} disabled={isLoading}>
+        <CardContent>
+            <Button variant="outline" className="w-full" type="button" onClick={handleGoogleSignIn}>
                 <GoogleIcon />
                 Sign in with Google
             </Button>
-            <div className="text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="text-primary hover:underline">
-                Sign up
-              </Link>
-            </div>
-          </CardFooter>
-        </form>
+        </CardContent>
       </Card>
     </div>
   );

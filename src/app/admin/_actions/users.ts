@@ -1,11 +1,13 @@
 
 'use server';
 
-import prisma from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getServerSession } from "next-auth/next"
 import { authOptions } from '@/lib/auth';
+import { firestore } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
+
 
 const updateUserSchema = z.object({
   firstName: z.string().min(1, 'First name is required').trim(),
@@ -40,17 +42,16 @@ export async function updateUserProfile(prevState: FormState, formData: FormData
   const newName = `${firstName} ${lastName}`;
   
   try {
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: {
-        name: newName,
-      },
+    const userRef = doc(firestore, 'users', session.user.id);
+    await updateDoc(userRef, {
+        name: newName
     });
 
     revalidatePath('/account');
     return { success: 'Profile updated successfully!' };
 
   } catch (e) {
+    console.error(e);
     return { error: { form: 'An error occurred while updating your profile.' }};
   }
 }

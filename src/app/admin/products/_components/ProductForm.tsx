@@ -1,15 +1,21 @@
+
 'use client'
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { addProduct, updateProduct } from "@/app/admin/_actions/products"
 import { useFormState } from "react-dom"
-import { Product, Category } from "@prisma/client"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+
+// These types are placeholders until we define the Firestore schema
+type Product = any; 
+type Category = any;
+
+// The actions are disabled as they were tied to Prisma
+const noOpAction = async () => ({ error: { form: "Database not connected. This is a placeholder." }});
 
 export function ProductForm({
   product,
@@ -18,10 +24,7 @@ export function ProductForm({
   product?: Product | null
   categories: Category[]
 }) {
-  const [error, action] = useFormState(
-    product == null ? addProduct : updateProduct.bind(null, product.id),
-    {}
-  )
+  const [error, action] = useFormState(noOpAction, {});
   const [price, setPrice] = useState<number | undefined>(product?.price ? Number(product.price) : undefined);
   const [originalPrice, setOriginalPrice] = useState<number | undefined>(product?.originalPrice ? Number(product.originalPrice) : undefined);
 
@@ -126,7 +129,8 @@ export function ProductForm({
         </div>
       </div>
 
-      <Button type="submit">{product == null ? "Add Product" : "Update Product"}</Button>
+      <Button type="submit" disabled>{product == null ? "Add Product" : "Update Product"}</Button>
+       {error?.form && <div className="text-destructive text-sm mt-2">{error.form}</div>}
     </form>
   )
 }

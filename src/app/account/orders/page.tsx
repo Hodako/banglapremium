@@ -1,3 +1,4 @@
+
 import {
   Table,
   TableBody,
@@ -8,31 +9,12 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { format } from "date-fns";
 import Link from "next/link";
 
-async function getUserOrders() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return [];
-  }
-
-  const orders = await prisma.order.findMany({
-    where: {
-      userId: session.user.id
-    },
-    orderBy: {
-      createdAt: 'desc'
-    }
-  })
-  return orders;
-}
 
 export default async function OrdersPage() {
-  const orders = await getUserOrders();
+  const orders = []; // Data will be fetched from firestore later
 
   return (
     <div>
@@ -50,21 +32,7 @@ export default async function OrdersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id.substring(0, 7)}...</TableCell>
-                    <TableCell>{format(new Date(order.createdAt), 'PPP')}</TableCell>
-                    <TableCell>
-                      <Badge variant={order.status === 'Completed' ? 'default' : 'secondary'} className={order.status === 'Completed' ? 'bg-green-600' : ''}>
-                        {order.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">৳{Number(order.total).toFixed(2)}</TableCell>
-                    <TableCell className="text-right">
-                        <Button variant="outline" size="sm">View Details</Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {/* Orders will be mapped here */}
               </TableBody>
             </Table>
           </div>

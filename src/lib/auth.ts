@@ -1,76 +1,37 @@
 
 import type { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
-import { PrismaAdapter } from '@auth/prisma-adapter';
-import prisma from '@/lib/db';
-import bcrypt from 'bcryptjs';
+import { FirebaseAdapter } from "@next-auth/firebase-adapter"
+import { firestore } from '@/lib/firebase';
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      allowDangerousEmailAccountLinking: true,
-    }),
-    CredentialsProvider({
-      name: 'Credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) {
-          return null;
-        }
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
-
-        if (!user || !user.password) {
-          return null;
-        }
-
-        const isValidPassword = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!isValidPassword) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role,
-        };
-      },
     }),
   ],
+  adapter: FirebaseAdapter(firestore),
   session: {
     strategy: 'jwt',
   },
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
-      if (trigger === "update" && session?.name) {
-        token.name = session.name
-      }
+    async jwt({ token, user }) {
       if (user) {
+        // This is a simplified role assignment. 
+        // In a real app, you might query Firestore to get a custom role.
+        const isAdmin = user.email === 'admin@example.com';
+        token.role = isAdmin ? 'admin' : 'customer';
         token.id = user.id;
-        token.role = (user as any).role;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as 'admin' | 'customer';
-        session.user.name = token.name;
+        // The default user type from next-auth doesn't have id or role
+        // so we need to cast it to include our custom properties.
+        (session.user as any).id = token.id as string;
+        (session.user as any).role = token.role as 'admin' | 'customer';
       }
       return session;
     },

@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -25,15 +26,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import prisma from "@/lib/db";
 import { format } from "date-fns";
 
 export default async function AdminCustomersPage() {
-  const customers = await prisma.user.findMany({
-    orderBy: {
-      createdAt: 'desc'
-    }
-  })
+  const customers = []; // Data will be fetched from Firestore later
   
   return (
     <Card>
@@ -41,9 +37,9 @@ export default async function AdminCustomersPage() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Customers</CardTitle>
-            <CardDescription>Manage your customers and view their details.</CardDescription>
+            <CardDescription>Manage your customers and view their details. (Firestore coming soon)</CardDescription>
           </div>
-          <Button size="sm" className="gap-1">
+          <Button size="sm" className="gap-1" disabled>
              <PlusCircle className="h-3.5 w-3.5" />
              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                 Add Customer
@@ -65,43 +61,14 @@ export default async function AdminCustomersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {customers.map((customer) => (
-              <TableRow key={customer.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-9 w-9">
-                        <AvatarImage src={customer.image || `https://picsum.photos/seed/${customer.id}/100`} alt={customer.name || ''} />
-                        <AvatarFallback>{customer.name ? customer.name.charAt(0) : 'U'}</AvatarFallback>
-                    </Avatar>
-                    <div className="font-medium">{customer.name}</div>
-                  </div>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">{customer.email}</TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <Badge variant={customer.role === 'admin' ? 'destructive' : 'secondary'}>{customer.role}</Badge>
-                </TableCell>
-                <TableCell className="hidden lg:table-cell">
-                  {format(new Date(customer.createdAt), 'PPP')}
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>View Details</DropdownMenuItem>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+             {customers.length === 0 && (
+                <TableRow>
+                    <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                        No customers found. User data will be managed in Firestore.
+                    </TableCell>
+                </TableRow>
+            )}
+            {/* Customers will be mapped here later */}
           </TableBody>
         </Table>
       </CardContent>

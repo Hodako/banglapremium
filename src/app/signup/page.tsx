@@ -1,24 +1,15 @@
 
-
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { signIn } from "next-auth/react";
 
 function GoogleIcon() {
@@ -28,64 +19,10 @@ function GoogleIcon() {
 }
 
 export default function SignupPage() {
-  const router = useRouter();
-  const { toast } = useToast();
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
-    const { email, password } = data;
-
-    try {
-        const response = await fetch('/api/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
-
-        const result = await response.json();
-        if (!response.ok) {
-            throw new Error(result.message || 'Signup failed');
-        }
-
-        toast({
-            title: "Account Created",
-            description: "Welcome! Logging you in...",
-        });
-        
-        // Automatically sign in the user after successful registration
-        const signInResult = await signIn('credentials', {
-            email,
-            password,
-            redirect: false,
-        });
-
-        if (signInResult?.error) {
-            toast({
-                variant: "destructive",
-                title: "Login Failed",
-                description: "Your account was created, but we couldn't log you in. Please log in manually.",
-            });
-            router.push('/login');
-        } else if (signInResult?.ok) {
-             router.push('/');
-        }
-
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-        toast({
-            variant: "destructive",
-            title: "Signup Failed",
-            description: errorMessage,
-        });
-    } finally {
-        setIsLoading(false);
-    }
-  };
+  const handleGoogleSignIn = async () => {
+    await signIn('google', { callbackUrl: '/' });
+  }
 
   return (
     <div className="container mx-auto flex min-h-[80vh] items-center justify-center px-4 py-12">
@@ -93,76 +30,21 @@ export default function SignupPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Create an Account</CardTitle>
           <CardDescription>
-            Join us to start shopping for your favorite digital services.
+            Join us by signing up with your Google account.
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSignup}>
-          <CardContent className="space-y-4">
-             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" name="firstName" placeholder="John" required disabled={isLoading} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" name="lastName" placeholder="Doe" required disabled={isLoading} />
-                </div>
-              </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-                disabled={isLoading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-               <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  disabled={isLoading}
-                />
-                 <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"
-                    onClick={() => setShowPassword(!showPassword)}
-                    disabled={isLoading}
-                  >
-                    {showPassword ? <EyeOff /> : <Eye />}
-                    <span className="sr-only">Toggle password visibility</span>
-                  </Button>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Creating Account...' : 'Create Account'}
-            </Button>
-            <div className="relative w-full">
-                <Separator className="absolute left-0 top-1/2 -translate-y-1/2 w-full" />
-                <span className="relative z-10 bg-card px-2 text-xs uppercase text-muted-foreground">Or continue with</span>
-            </div>
-            <Button variant="outline" className="w-full" type="button" onClick={() => signIn('google', { callbackUrl: '/' })} disabled={isLoading}>
+        <CardContent>
+            <Button variant="outline" className="w-full" type="button" onClick={handleGoogleSignIn}>
                 <GoogleIcon />
                 Sign up with Google
             </Button>
-            <div className="mt-2 text-center text-sm">
+        </CardContent>
+         <CardContent className="text-center text-sm">
               Already have an account?{" "}
               <Link href="/login" className="text-primary hover:underline">
                 Sign in
               </Link>
-            </div>
-          </CardFooter>
-        </form>
+            </CardContent>
       </Card>
     </div>
   );

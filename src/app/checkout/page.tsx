@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useCart } from "@/context/cart-context";
@@ -92,34 +93,12 @@ export default function CheckoutPage() {
   }, [cart.length, router, status]);
 
   const onSubmit = async (data: CheckoutFormValues) => {
-    try {
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...data,
-          total,
-          cart
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create order");
-      }
-      
-      clearCart();
-      router.push(`/order-confirmation?total=${total.toFixed(2)}`);
-
-    } catch (error) {
-      toast({
+    toast({
         variant: "destructive",
         title: "Order Failed",
-        description: "There was an issue placing your order. Please try again."
-      })
-    }
-
+        description: "Order processing is temporarily disabled pending database migration."
+    });
+    return;
   };
 
   if (status === 'loading' || (status === 'authenticated' && cart.length === 0) || !user) {

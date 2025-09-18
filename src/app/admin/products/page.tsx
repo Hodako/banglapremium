@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -26,33 +27,10 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from 'next/link';
 import { MoreHorizontal, PlusCircle } from "lucide-react";
-import prisma from "@/lib/db";
-import { deleteProduct } from "../_actions/products";
-import { notFound } from "next/navigation";
 
-
-function DeleteDropDownItem({ id }: { id: string }) {
-  return (
-    <form action={async () => {
-      'use server'
-      await deleteProduct(id)
-    }}>
-      <button type="submit" className="w-full text-left relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 text-destructive">
-        Delete
-      </button>
-    </form>
-  )
-}
 
 export default async function AdminProductsPage() {
-  const allProducts = await prisma.product.findMany({
-    include: {
-      category: true,
-    },
-    orderBy: {
-        createdAt: 'desc'
-    }
-  });
+  const allProducts = []; // Data will be fetched from Firestore later
 
   return (
     <Card>
@@ -60,7 +38,7 @@ export default async function AdminProductsPage() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Products</CardTitle>
-            <CardDescription>Manage your products here.</CardDescription>
+            <CardDescription>Manage your products here. (Firestore coming soon)</CardDescription>
           </div>
           <Button size="sm" className="gap-1" asChild>
             <Link href="/admin/products/new">
@@ -89,45 +67,14 @@ export default async function AdminProductsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {allProducts.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell className="hidden sm:table-cell">
-                  <Image
-                    alt={product.name}
-                    className="aspect-square rounded-md object-cover"
-                    height="64"
-                    src={product.imageUrl || 'https://placehold.co/64'}
-                    width="64"
-                  />
-                </TableCell>
-                <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">Active</Badge>
-                </TableCell>
-                <TableCell>৳{Number(product.price).toFixed(2)}</TableCell>
-                <TableCell className="hidden md:table-cell">
-                  {product.category?.name}
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem asChild>
-                        <Link href={`/admin/products/${product.id}/edit`}>Edit</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DeleteDropDownItem id={product.id} />
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+            {allProducts.length === 0 && (
+                <TableRow>
+                    <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                        No products found. Product data will be managed in Firestore.
+                    </TableCell>
+                </TableRow>
+            )}
+            {/* Products will be mapped here */}
           </TableBody>
         </Table>
       </CardContent>
